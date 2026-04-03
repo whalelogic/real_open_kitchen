@@ -1,2 +1,6 @@
-# real_open_kitchen
+# My Open Kitchen
+
 Source code for Open Kitchen Recipe Management Application
+
+
+
