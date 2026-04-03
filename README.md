@@ -1,6 +1,6 @@
 # My Open Kitchen
 
-**My Open Kitchen** is a full-featured Python-Flask web application for recipe management. Users can create, edit, delete, and share (fork) recipes — a community-driven kitchen for everyone on the team to build together.
+**My Open Kitchen** is a full-featured Python-Flask web application for recipe management. Users can create, edit, delete, and share (fork) recipes — a community-driven kitchen for everyone.
 
 ---
 
