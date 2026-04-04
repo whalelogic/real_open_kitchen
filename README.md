@@ -2,6 +2,16 @@
 
 **My Open Kitchen** is a full-featured Python-Flask web application for recipe management. Users can create, edit, delete, and share (fork) recipes — a community-driven kitchen for everyone.
 
+
+> Initial source code should be committed into the `main` branch using git add . | git commit | git push -u origin main
+
+> From then on, always commit to the `test` branch so it can be merged into `main`.
+
+> Anyone can then add/update/remove code directly or by submitting a pull request which will then be merged by me, though we all have full access.
+
+> I can facilitate merging the code if anyone runs into issues, just send it my way.
+
+
 ---
 
 ## Table of Contents
@@ -26,7 +36,7 @@
 |--------|-------|
 | Framework | Python / Flask |
 | App Type | Full-featured CRUD |
-| Core Features | Create, read, update, delete, and fork recipes |
+| Core Features | Authentication, Create, Read, Update, Delete, and Fork recipes |
 | Primary Branch | `main` |
 
 ---
@@ -178,7 +188,7 @@ git push origin feature/your-feature-name
 
 ## Code Review Process
 
-The project lead will review every Pull Request before it is merged into `main`.
+The project source code and repo maintainer (Keith) will review code in each Pull Request. Will check for compatibility, bugs, other stuff, before it is merged into `main`.
 
 **As a contributor:**
 - Keep PRs focused — one feature or fix per PR makes review faster.
@@ -205,7 +215,7 @@ real_open_kitchen/
 ├── tests/                # Unit and integration tests
 ├── requirements.txt      # Python dependencies
 ├── README.md             # This file
-└── run.py                # App entry point
+└── app.py                # App entry point
 ```
 
 > Note: The structure above reflects the planned layout. Update this section as the project grows.
