@@ -11,7 +11,11 @@
 
 > From then on, always commit to the `test` branch so it can be merged into `main`.
 
-> Anyone can then add/update/remove code directly or by submitting a pull request which will then be merged. We all have full access.
+> Anyone can then add/update/remove code directly or by submitting a pull request which will then be merged.
+
+> We all have full access.
+
+> You can also just send me the code you want merged and I will take care of it 😃 
 
 
 ---
