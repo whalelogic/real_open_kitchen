@@ -7,9 +7,7 @@
 
 ### __Important!!__
 
-> Initial source code should be committed into the `main` branch using git add . | git commit | git push -u origin main
-
-> From then on, always commit to the `test` branch so it can be merged into `main`.
+> Commit to the `test` branch so it can be merged into `main`.
 
 > Anyone can then add/update/remove code directly or by submitting a pull request which will then be merged (follow guidelines below).
 
