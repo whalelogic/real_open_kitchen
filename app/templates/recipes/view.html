@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}{{ recipe.title }}{% endblock %}
+{% block content %}
+<style>
+    .recipe-main-card { background-color: var(--cream); border: 3px solid var(--border-dark); border-radius: 30px; padding: 2.5rem; margin-bottom: 2rem; }
+    .item-row { background-color: white; border: 2px solid var(--border-dark); border-radius: 50px; padding: 12px 25px; margin-bottom: 1rem; display: flex; align-items: center; gap: 15px; font-weight: bold; }
+    .step-num { background-color: var(--pill-green); min-width: 35px; height: 35px; border: 2px solid var(--border-dark); border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+</style>
+<div class="recipe-main-card">
+    <h1 style="font-family: 'Georgia', serif; text-transform: uppercase; font-size: 2.5rem;">{{ recipe.title }}</h1>
+    <p>By {{ recipe.author_name|upper }} | {{ recipe.template_type|replace('_', ' ')|upper }}</p>
+</div>
+<div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px;">
+    <div class="recipe-main-card">
+        <h2 style="font-family: 'Georgia', serif; text-transform: uppercase; border-bottom: 2px solid var(--border-dark); display: inline-block;">Ingredients</h2>
+        {% for ing in ingredients %}
+        <div class="item-row">{{ ing.quantity }} {{ ing.abbreviation or ing.unit_name }} {{ ing.name }}</div>
+        {% endfor %}
+    </div>
+    <div class="recipe-main-card">
+        <h2 style="font-family: 'Georgia', serif; text-transform: uppercase; border-bottom: 2px solid var(--border-dark); display: inline-block;">Instructions</h2>
+        {% for step in instructions %}
+        <div class="item-row" style="border-radius: 20px; align-items: flex-start;">
+            <div class="step-num">{{ step.step_number }}</div>
+            <div style="padding-top: 5px;">{{ step.content }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
