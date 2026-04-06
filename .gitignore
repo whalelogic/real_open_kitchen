@@ -1,5 +1,4 @@
 ./venv
-copilot-instructions.md
 __pycache__/
 *.log
 .idea/
