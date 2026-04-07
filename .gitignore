@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+./venv
+>>>>>>> 41dbd0bcc7975d70972be644a7b75d318789a115
 __pycache__/
 *.log
 .idea/
