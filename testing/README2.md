@@ -11,8 +11,6 @@
 
 > We all have full access.
 
-> You can also just send me the code you want merged and I will take care of it 😃 
-
 
 ---
 
