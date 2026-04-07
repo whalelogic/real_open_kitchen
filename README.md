@@ -2,10 +2,6 @@
 
 A collaborative recipe management system designed for community and family environments, built with Flask and SQLite.
 
-#### Admin User Credentials:
-- **Username**: admin
-- **Password**: admin
-
 ## Features
 
 - **User Authentication**: Secure registration and login system with role-based access (Contributor, Curator)
