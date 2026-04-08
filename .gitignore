@@ -9,4 +9,6 @@ __pycache__/
 *.env
 *.bak
 *.tmp
-
+./testing/BULMAIMPLEMENTATION.md
+./testing/README2.md
+./testing/*
