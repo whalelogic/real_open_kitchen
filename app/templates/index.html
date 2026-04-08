@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Open Kitchen{% endblock %}
+
+{% block content %}
+<style>
+    /* --- HERO SECTION --- */
+    .hero-title {
+        font-family: 'Georgia', serif;
+        text-transform: uppercase;
+        font-size: 3.5rem;
+        color: var(--cream);
+        letter-spacing: 2px;
+        margin-bottom: 1rem;
+    }
+
+    .hero-subtitle {
+        color: var(--cream);
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: 0.9;
+        margin-bottom: 3rem;
+    }
+
+    /* --- STATS SECTION --- */
+    .stat-pill {
+        background-color: var(--pill-green);
+        border: 3px solid var(--border-dark);
+        border-radius: 30px;
+        padding: 2rem;
+        text-align: center;
+        transition: transform 0.2s;
+    }
+
+    .stat-pill:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-val {
+        display: block;
+        font-family: 'Georgia', serif;
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--border-dark);
+    }
+
+    .stat-name {
+        text-transform: uppercase;
+        font-weight: bold;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+    }
+
+    /* --- BROWSE CATEGORIES --- */
+    .category-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        margin: 2rem 0;
+    }
+
+    .category-pill {
+        background-color: white;
+        border: 2px solid var(--border-dark);
+        border-radius: 12px;
+        padding: 8px 18px;
+        color: var(--forest-green) !important;
+        font-weight: bold;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.2s;
+    }
+
+    .category-pill:hover {
+        background-color: var(--pill-green);
+        transform: translateY(-3px);
+        box-shadow: 4px 4px 0px var(--border-dark);
+    }
+
+    /* --- RECENT ADDITIONS (RECIPE CARDS) --- */
+    .recipe-grid-card {
+        display: block;
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 2px solid var(--pill-green);
+        border-radius: 20px;
+        padding: 1.5rem;
+        height: 100%;
+        transition: all 0.3s ease;
+        text-decoration: none !important;
+    }
+
+    .recipe-grid-card:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-5px);
+        border-color: var(--cream);
+    }
+
+    .recipe-title {
+        font-family: 'Georgia', serif;
+        color: var(--pill-green) !important;
+        font-weight: bold;
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .recipe-description {
+        color: var(--cream);
+        font-size: 0.85rem;
+        line-height: 1.4;
+        opacity: 0.9;
+    }
+
+    .meta-label {
+        margin-top: 1rem;
+        font-size: 0.7rem;
+        font-weight: bold;
+        letter-spacing: 1.5px;
+        color: var(--pill-green);
+        text-transform: uppercase;
+    }
+
+    /* --- FEATURES SECTION --- */
+    .feature-card {
+        background-color: var(--cream);
+        border: 2px solid var(--border-dark);
+        border-radius: 20px;
+        padding: 2rem;
+        height: 100%;
+        text-align: center;
+    }
+
+    .feature-title {
+        font-family: 'Georgia', serif;
+        text-transform: uppercase;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+</style>
+
+<section class="section has-text-centered" style="padding: 4rem 0;">
+    <h1 class="hero-title">Open Kitchen</h1>
+    <p class="hero-subtitle">Collaborative Recipe Management for Communities</p>
+
+    <div class="buttons is-centered">
+        {% if not g.user %}
+            <a href="{{ url_for('auth.register') }}" class="btn-pill" style="padding: 15px 40px;">GET STARTED</a>
+            <a href="{{ url_for('auth.login') }}" class="btn-pill" style="background-color: transparent; color: var(--cream); border-color: var(--cream); margin-left: 15px;">LOGIN</a>
+        {% else %}
+            <a href="{{ url_for('recipes.create') }}" class="btn-pill" style="padding: 15px 40px;">CREATE RECIPE</a>
+            <a href="{{ url_for('dashboard.index') }}" class="btn-pill" style="background-color: transparent; color: var(--cream); border-color: var(--cream); margin-left: 15px;">MY KITCHEN</a>
+        {% endif %}
+    </div>
+</section>
+
+<div class="columns is-multiline mb-6">
+    <div class="column is-4">
+        <div class="stat-pill">
+            <span class="stat-val">{{ stats.total_recipes }}</span>
+            <span class="stat-name">Recipes Shared</span>
+        </div>
+    </div>
+    <div class="column is-4">
+        <div class="stat-pill">
+            <span class="stat-val">{{ stats.total_users }}</span>
+            <span class="stat-name">Community Members</span>
+        </div>
+    </div>
+    <div class="column is-4">
+        <div class="stat-pill">
+            <span class="stat-val">{{ stats.total_reviews }}</span>
+            <span class="stat-name">Total Reviews</span>
+        </div>
+    </div>
+</div>
+
+<div class="form-card" style="background-color: var(--cream); border: 3px solid var(--border-dark); border-radius: 40px; padding: 3rem; margin-bottom: 4rem;">
+    <h2 style="font-family: 'Georgia', serif; text-transform: uppercase; text-align: center; margin-bottom: 2rem; font-size: 1.5rem;">Browse Categories</h2>
+    <div class="category-list">
+        {% set cats = [
+            ('1', 'Appetizer'), ('2', 'Main Course'), ('3', 'Dessert'),
+            ('4', 'Breakfast'), ('5', 'Lunch'), ('6', 'Dinner'),
+            ('7', 'Snack'), ('8', 'Beverage'), ('9', 'Salad'),
+            ('10', 'Soup'), ('11', 'Side Dish')
+        ] %}
+        {% for cid, cname in cats %}
+            <a href="{{ url_for('recipes.index', category=cid) }}" class="category-pill">{{ cname }}</a>
+        {% endfor %}
+        <a href="{{ url_for('recipes.index') }}" class="category-pill" style="background-color: var(--pill-green);">VIEW ALL →</a>
+    </div>
+</div>
+
+<div class="mb-6">
+    <div class="level">
+        <div class="level-left">
+            <h2 style="font-family: 'Georgia', serif; text-transform: uppercase; color: var(--cream); font-size: 1.8rem;">Recent Additions</h2>
+        </div>
+        <div class="level-right">
+            <a href="{{ url_for('recipes.index') }}" style="color: var(--cream); font-weight: bold; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Browse All →</a>
+        </div>
+    </div>
+
+    <div class="columns is-multiline mt-4">
+        {% for recipe in recipes %}
+            <div class="column is-4">
+                <a href="{{ url_for('recipes.view', id=recipe.id) }}" class="recipe-grid-card">
+                    <h3 class="recipe-title">{{ recipe.title }}</h3>
+                    <p class="recipe-description">{{ recipe.description[:80] }}...</p>
+                    <div class="meta-label">BY {{ recipe.author_name|upper }}</div>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="columns is-multiline">
+    <div class="column is-3">
+        <div class="feature-card">
+            <h3 class="feature-title">Structured Data</h3>
+            <p style="font-size: 0.9rem;">Dynamic scaling and structured ingredients for modern cooking.</p>
+        </div>
+    </div>
+    <div class="column is-3">
+        <div class="feature-card">
+            <h3 class="feature-title">Fork & Adapt</h3>
+            <p style="font-size: 0.9rem;">Create personal versions while honoring the original creator.</p>
+        </div>
+    </div>
+    <div class="column is-3">
+        <div class="feature-card">
+            <h3 class="feature-title">Dietary Safety</h3>
+            <p style="font-size: 0.9rem;">Integrated allergen tracking for safer community sharing.</p>
+        </div>
+    </div>
+    <div class="column is-3">
+        <div class="feature-card">
+            <h3 class="feature-title">Collective Kitchen</h3>
+            <p style="font-size: 0.9rem;">A space for families and groups to build a shared legacy.</p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
