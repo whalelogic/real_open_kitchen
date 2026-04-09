@@ -15,6 +15,58 @@ A collaborative recipe management system designed for community and family envir
 
 ## Project Structure
 
+### __Important!!__
+
+> Commit to the `test` branch so it can be merged into `main`.
+
+> We all have full access.
+> 
+---
+
+## Table of Contents
+
+1. [Project Overview](#project-overview)
+2. [Prerequisites](#prerequisites)
+3. [Getting Started — Clone the Repo](#getting-started--clone-the-repo)
+4. [Setting Up Your Local Environment](#setting-up-your-local-environment)
+5. [Running the App](#running-the-app)
+6. [Git Workflow](#git-workflow)
+   - [Everyday Git Commands](#everyday-git-commands)
+   - [Branching Strategy](#branching-strategy)
+   - [Submitting a Pull Request](#submitting-a-pull-request)
+7. [Code Review Process](#code-review-process)
+8. [Project Structure](#project-structure)
+
+---
+
+## Project Overview
+
+| Detail | Value |
+|--------|-------|
+| Framework | Python / Flask |
+| App Type | Full-featured CRUD |
+| Core Features | Authentication, Create, Read, Update, Delete, and Fork recipes |
+| Primary Branch | `main` |
+
+---
+
+## Prerequisites
+
+Make sure you have the following installed before you start:
+
+- [Python 3.10+](https://www.python.org/downloads/)
+- [Git](https://git-scm.com/downloads)
+- [pip](https://pip.pypa.io/en/stable/) (comes with Python)
+- A code editor such as [VS Code](https://code.visualstudio.com/)
+
+---
+
+## Getting Started — Clone the Repo
+
+**Step 1 — Clone the repository to your local machine:**
+
+```bash
+git clone https://github.com/whalelogic/real_open_kitchen.git
 ```
 open-kitchen/
 ├── app/
