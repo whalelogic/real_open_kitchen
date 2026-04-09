@@ -6,7 +6,7 @@ from app.models import User
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-
+#comment
 @bp.route('/register', methods=('GET', 'POST'))
 def register():
     """Register a new user."""
