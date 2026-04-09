@@ -23,6 +23,8 @@ CREATE TABLE users (
     password_hash TEXT NOT NULL,
     role_id INTEGER NOT NULL DEFAULT 1,
     notifications_enabled INTEGER DEFAULT 1,
+    reset_code TEXT,
+    reset_code_expires DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME,
     FOREIGN KEY (role_id) REFERENCES roles(id)
