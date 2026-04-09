@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Edit Instructions{% endblock %}
+{% block content %}
+
+<div class="form-card" style="background-color: var(--cream); border: 3px solid var(--border-dark); border-radius: 30px; padding: 2rem; margin-bottom: 2rem;">
+    <h1 style="font-family: 'Georgia', serif; text-transform: uppercase;">Edit Instructions</h1>
+    <form method="post" class="mt-4">
+        <div style="display: flex; gap: 15px; align-items: flex-start;">
+            <div style="flex: 0 0 80px;">
+                <label style="display: block; font-weight: bold; font-size: 0.7rem;">STEP</label>
+                <input type="number" name="step_number" value="{{ (instructions|length) + 1 }}" style="width: 100%; border: 2px solid var(--border-dark); border-radius: 15px; padding: 10px;">
+            </div>
+            <div style="flex: 1;">
+                <label style="display: block; font-weight: bold; font-size: 0.7rem;">DESCRIPTION</label>
+                <textarea name="content" placeholder="DESCRIBE THE STEP..." style="width: 100%; border: 2px solid var(--border-dark); border-radius: 15px; padding: 10px;" required></textarea>
+            </div>
+        </div>
+        <button type="submit" style="margin-top: 1rem; background-color: var(--pill-green); border: 2px solid var(--border-dark); border-radius: 50px; padding: 10px 30px; font-weight: bold; cursor: pointer;">ADD STEP</button>
+    </form>
+</div>
+
+{% if instructions %}
+<div class="form-card" style="background-color: var(--cream); border: 3px solid var(--border-dark); border-radius: 30px; padding: 2rem;">
+    <h2 style="font-family: 'Georgia', serif; text-transform: uppercase; font-size: 1.2rem; margin-bottom: 1.5rem;">Current Steps</h2>
+    {% for step in instructions %}
+    <div style="background-color: white; border: 2px solid var(--border-dark); border-radius: 20px; padding: 15px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <span style="background-color: var(--pill-green); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid var(--border-dark);">{{ step.step_number }}</span>
+            <span>{{ step.content }}</span>
+        </div>
+        
+        <form method="post" action="{{ url_for('recipes.delete_instruction', id=step.id) }}">
+            <button type="submit" style="background: none; border: 1px solid var(--border-dark); border-radius: 10px; padding: 5px 10px; font-size: 0.7rem; font-weight: bold; cursor: pointer; color: #8b0000;">REMOVE</button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div style="margin-top: 2rem; display: flex; gap: 15px;">
+    <a href="{{ url_for('recipes.view', id=recipe.id) }}" class="btn-pill" style="background-color: white;">DONE</a>
+    <a href="{{ url_for('recipes.edit_ingredients', id=recipe.id) }}" style="text-decoration: none; color: var(--cream); font-weight: bold; align-self: center;">BACK TO INGREDIENTS</a>
+</div>
+
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Units - Admin{% endblock %}
+
+{% block content %}
+<style>
+    .admin-title {
+        font-family: 'Georgia', serif;
+        text-transform: uppercase;
+        font-size: 2rem;
+        color: var(--cream);
+    }
+
+    .registry-card {
+        background-color: var(--cream);
+        border: 3px solid var(--border-dark);
+        border-radius: 25px;
+        padding: 2rem;
+    }
+
+    .registry-table {
+        background-color: transparent;
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .registry-table th {
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+        border-bottom: 2px solid var(--border-dark);
+        padding: 12px;
+        text-align: left;
+    }
+
+    .registry-table td {
+        padding: 12px;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        font-size: 0.95rem;
+    }
+
+    .abbr-code {
+        font-family: monospace;
+        background-color: rgba(0,0,0,0.05);
+        padding: 2px 6px;
+        border-radius: 4px;
+        color: var(--forest-green);
+        font-weight: bold;
+    }
+
+    .form-label {
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .custom-input {
+        width: 100%;
+        padding: 10px;
+        border-radius: 10px;
+        border: 2px solid var(--border-dark);
+        background-color: white;
+    }
+</style>
+
+<div class="level mb-5">
+    <div class="level-left">
+        <h1 class="admin-title">Units Registry</h1>
+    </div>
+    <div class="level-right">
+        <a href="{{ url_for('admin.index') }}" class="btn-pill" style="background-color: transparent; color: var(--cream); border-color: var(--cream);">
+            BACK TO ADMIN
+        </a>
+    </div>
+</div>
+
+<div class="registry-card mb-5">
+    <h2 style="font-family: 'Georgia', serif; text-transform: uppercase; font-weight: bold; margin-bottom: 1.5rem;">Add New Unit</h2>
+    <form method="post" action="{{ url_for('admin.add_unit') }}">
+        <div class="columns is-align-items-end">
+            <div class="column is-7">
+                <label class="form-label" for="name">Full Unit Name</label>
+                <input class="custom-input" type="text" name="name" id="name" placeholder="e.g., Tablespoon" required>
+            </div>
+            <div class="column is-3">
+                <label class="form-label" for="abbreviation">Abbreviation</label>
+                <input class="custom-input" type="text" name="abbreviation" id="abbreviation" placeholder="e.g., tbsp">
+            </div>
+            <div class="column is-2">
+                <button type="submit" class="btn-pill" style="width: 100%; padding: 12px 0;">ADD UNIT</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="registry-card">
+    <h2 style="font-family: 'Georgia', serif; text-transform: uppercase; font-weight: bold; margin-bottom: 1rem;">Existing Measurement Units</h2>
+    <div class="table-container">
+        <table class="registry-table">
+            <thead>
+                <tr>
+                    <th>Unit Name</th>
+                    <th>Registry Abbreviation</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for unit in units %}
+                <tr>
+                    <td><strong>{{ unit.name }}</strong></td>
+                    <td><span class="abbr-code">{{ unit.abbreviation }}</span></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

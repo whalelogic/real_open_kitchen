@@ -1,9 +1,19 @@
-# My Open Kitchen
+# Open Kitchen - Recipe Sharing Application
 
-**My Open Kitchen** is a full-featured Python-Flask web application for recipe management. Users can create, edit, delete, and share (fork) recipes — a community-driven kitchen for everyone.
+A collaborative recipe management system designed for community and family environments, built with Flask and SQLite.
 
+## Features
 
+- **User Authentication**: Secure registration and login system with role-based access (Contributor, Curator)
+- **Recipe Management**: Create, view, and fork recipes with structured ingredient data
+- **Dynamic Scaling**: Automatically scale ingredient quantities for different serving sizes
+- **Recipe Templates**: Support for Standard Recipes and Quick Tips
+- **Social Features**: Reviews, comments, and recipe saving
+- **Personal Dashboard**: "My Kitchen" view with authored, forked, and saved recipes
+- **Admin Tools**: User management, allergen audits, fork reports, and activity tracking
+- **Notifications**: Event-triggered notifications for recipe interactions
 
+## Project Structure
 
 ### __Important!!__
 
@@ -58,167 +68,164 @@ Make sure you have the following installed before you start:
 ```bash
 git clone https://github.com/whalelogic/real_open_kitchen.git
 ```
-
-**Step 2 — Move into the project directory:**
-
-```bash
-cd real_open_kitchen
-```
-
-That's it — you now have a full copy of the codebase on your machine.
-
----
-
-## Setting Up Your Local Environment
-
-**Step 1 — Create a virtual environment** (keeps project dependencies isolated):
-
-```bash
-python -m venv venv
-```
-
-**Step 2 — Activate the virtual environment:**
-
-- **macOS / Linux:**
-  ```bash
-  source venv/bin/activate
-  ```
-- **Windows (Command Prompt):**
-  ```bash
-  venv\Scripts\activate
-  ```
-
-Your terminal prompt will show `(venv)` when the environment is active.
-
-**Step 3 — Install project dependencies:**
-
-```bash
-pip install -r requirements.txt
-```
-
-> If `requirements.txt` doesn't exist yet, install Flask manually and pin it:
-> ```bash
-> pip install flask
-> pip freeze > requirements.txt
-> ```
-
----
-
-## Running the App
-
-```bash
-flask run
-```
-
-The app will be available at **http://127.0.0.1:5000** by default.
-
-To enable debug mode (auto-reloads on code changes):
-
-```bash
-flask --debug run
-```
-
----
-
-## Git Workflow
-
-### Everyday Git Commands
-
-| Command | What it does |
-|---------|-------------|
-| `git status` | Shows which files have changed |
-| `git pull origin main` | Downloads the latest changes from the remote `main` branch |
-| `git add .` | Stages all changed files for commit (the `.` means "everything") |
-| `git add path/to/file` | Stages a specific file only |
-| `git commit -m "your message"` | Saves a snapshot of your staged changes with a description |
-| `git push origin your-branch-name` | Uploads your branch to GitHub |
-| `git log --oneline` | Shows recent commit history in a compact view |
-
-### Branching Strategy
-
-**Never commit directly to `main`.** All work is done on a feature branch and merged in through a Pull Request.
-
-**Step 1 — Make sure your local `main` is up to date before branching:**
-
-```bash
-git checkout main
-git pull origin main
-```
-
-**Step 2 — Create a new branch for your feature or fix:**
-
-```bash
-git checkout -b feature/your-feature-name
-```
-
-Use a descriptive branch name that reflects the work, for example:
-- `feature/add-recipe-form`
-- `fix/delete-button-error`
-- `chore/update-dependencies`
-
-**Step 3 — Make your changes, then stage and commit them:**
-
-```bash
-git add .
-git commit -m "Add recipe creation form with validation"
-```
-
-Write commit messages in plain English describing *what* the change does, not *how*.
-
-**Step 4 — Push your branch to GitHub:**
-
-```bash
-git push origin feature/your-feature-name
-```
-
-### Submitting a Pull Request
-
-1. Go to the repository on GitHub: [https://github.com/whalelogic/real_open_kitchen](https://github.com/whalelogic/real_open_kitchen)
-2. GitHub will usually show a banner prompting you to **"Compare & pull request"** for your recently pushed branch — click it.
-3. If the banner isn't there, click the **"Pull requests"** tab → **"New pull request"**, then select your branch.
-4. Fill in the PR form:
-   - **Title:** Short summary of your change (e.g., `Add recipe creation form`)
-   - **Description:** Explain *what* you changed and *why*. If it fixes a bug, describe the bug. If it adds a feature, describe what it does.
-5. Set the base branch to **`main`**.
-6. Click **"Create pull request"**.
-7. Wait for a review — do not merge your own PR.
-
----
-
-## Code Review Process
-
-The project source code and repo maintainer (Keith) will review code in each Pull Request. Will check for compatibility, bugs, other stuff, before it is merged into `main`.
-
-**As a contributor:**
-- Keep PRs focused — one feature or fix per PR makes review faster.
-- Respond to review comments by pushing additional commits to the same branch; the PR updates automatically.
-- Once approved, the reviewer will merge the PR.
-
-**As the reviewer:**
-- Approve the PR when it looks good.
-- Request changes if something needs to be fixed before merging.
-- Use the **"Squash and merge"** or **"Merge commit"** option to bring the work into `main`.
-
----
-
-## Project Structure
-
-```
-real_open_kitchen/
+open-kitchen/
 ├── app/
-│   ├── __init__.py       # Flask app factory
-│   ├── models.py         # Database models (recipes, users)
-│   ├── routes.py         # URL routes and view functions
-│   └── templates/        # HTML templates (Jinja2)
-├── static/               # CSS, JavaScript, images
-├── tests/                # Unit and integration tests
-├── requirements.txt      # Python dependencies
-├── README.md             # This file
-└── app.py                # App entry point
+│   ├── __init__.py          # Application factory
+│   ├── auth.py              # Authentication blueprint
+│   ├── recipes.py           # Recipe management blueprint
+│   ├── dashboard.py         # User dashboard blueprint
+│   ├── admin.py             # Admin tools blueprint
+│   ├── db.py                # Database connection and initialization
+│   ├── schema.sql           # Database schema with seed data
+│   └── templates/           # Jinja2 templates
+│       ├── base.html
+│       ├── auth/
+│       ├── recipes/
+│       ├── dashboard/
+│       └── admin/
+├── instance/
+│   └── community_kitchen.db # SQLite database (created after init)
+├── requirements.txt
+└── README.md
 ```
 
-> Note: The structure above reflects the planned layout. Update this section as the project grows.
+## Overview Diagram
+```mermaid
+graph TB
+    Client[Client Browser<br/>HTML/CSS/JS]
+    Flask[Flask Application<br/>app/__init__.py]
+    Auth[Auth Blueprint<br/>/auth/*]
+    Recipes[Recipes Blueprint<br/>/recipes/*]
+    Dashboard[Dashboard Blueprint<br/>/dashboard/*]
+    Admin[Admin Blueprint<br/>/admin/*]
+    DB[Database Layer<br/>db.py]
+    SQLite[(SQLite Database<br/>community_kitchen.db)]
+    
+    Client -->|HTTP Requests| Flask
+    Flask --> Auth
+    Flask --> Recipes
+    Flask --> Dashboard
+    Flask --> Admin
+    Auth --> DB
+    Recipes --> DB
+    Dashboard --> DB
+    Admin --> DB
+    DB --> SQLite
+    
+    style Flask fill:#3498db,color:#fff
+    style SQLite fill:#2c3e50,color:#fff
+```
 
+## Installation
 
+1. **Clone the repository** (or use existing directory)
 
+2. **Create and activate virtual environment**:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
+3. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Initialize the database**:
+   ```bash
+   export FLASK_APP=app
+   flask init-db
+   ```
+
+## Running the Application
+
+1. **Start the development server**:
+   ```bash
+   export FLASK_APP=app
+   export FLASK_ENV=development  # Optional: enables debug mode
+   flask run
+   ```
+
+2. **Access the application**:
+   Open your browser to `http://127.0.0.1:8080`
+
+## Database Schema
+
+The application uses SQLite with the following core tables:
+
+### Authentication & Authorization
+- `users`: User accounts with role assignments
+- `roles`: System roles (Contributor, Curator)
+
+### Recipe System
+- `recipes`: Core recipe metadata with template type and fork tracking
+- `ingredients`: Structured ingredient data with quantities and units
+- `instructions`: Step-by-step cooking instructions
+- `units`: Measurement units (Curator-managed)
+- `allergens`: Allergen tracking for safety
+
+### Classification
+- `categories`: Recipe categories (Appetizer, Dessert, etc.)
+- `tags`: Dietary tags (Vegan, Gluten-Free, etc.)
+- Many-to-many junction tables
+
+### Social Features
+- `reviews`: Star ratings and comments (1-5 stars)
+- `comments`: Discussion threads
+- `saved_recipes`: User favorites
+- `friendships`: Community connections
+
+### System
+- `notifications`: Event-triggered user notifications
+- `activity_logs`: Activity tracking for reports
+
+## Default User Roles
+
+- **Contributor** (role_id: 1): Standard user with recipe creation and social features
+- **Curator** (role_id: 2): Administrator with full system access
+
+To create a Curator account, register normally then update the database:
+```bash
+sqlite3 instance/community_kitchen.db "UPDATE users SET role_id = 2 WHERE username = 'your_username';"
+```
+
+## Key Features Implementation
+
+### Recipe Forking
+Recipes can be forked to create personalized versions while maintaining lineage tracking via `parent_recipe_id`.
+
+### Dynamic Ingredient Scaling
+Ingredients are stored with numeric quantities that can be dynamically scaled:
+```
+scaled_quantity = (requested_servings / base_servings) * original_quantity
+```
+
+### Allergen Safety
+Ingredients can be tagged with allergens for safety auditing and filtering.
+
+### Admin Reports
+Curators can generate:
+- Most Forked Recipes report
+- Allergen Audit by specific allergen
+- User Activity Report (30-day window)
+
+## Technology Stack
+
+- **Backend**: Flask 3.1.3
+- **Database**: SQLite 3
+- **Authentication**: Werkzeug password hashing
+- **Forms**: Flask-WTF
+- **Templates**: Jinja2
+
+## Development
+
+The application follows Flask best practices with:
+- Application factory pattern
+- Blueprint-based modular architecture
+- Proper database connection handling
+- Foreign key enforcement
+- Role-based authorization decorators
+
+## License
+
+This is a university project for Software Development using Agile methodologies.
