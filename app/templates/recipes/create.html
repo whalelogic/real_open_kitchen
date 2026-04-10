@@ -58,7 +58,14 @@
             <h1 class="recipe-title has-text-centered">Create New Recipe</h1>
             
             <form method="post">
-                <input type="hidden" name="template_type" value="create_recipe">
+            <div class="field">
+                <label class="form-label" for="template_type">Template Type</label>
+                <select class="recipe-input" name="template_type" id="template_type" required>
+                    <option value="">-- Select Template --</option>
+                    <option value="standard">Standard</option>
+                    <option value="quick_tip">Quick Tip</option>
+                </select>
+                </div>
 
                 <div class="field">
                     <label class="form-label" for="title">Recipe Title</label>
@@ -69,6 +76,53 @@
                     <label class="form-label" for="description">Description</label>
                     <textarea class="recipe-textarea" name="description" id="description" placeholder="Share a little bit about this dish..."></textarea>
                 </div>
+
+                <div class="field">
+                    <label class="form-label" for="base_servings">Base Servings</label>
+                    <input class="recipe-input" type="number" name="base_servings" id="base_servings" min="1" placeholder="e.g., 4">
+                </div>
+
+                <div class="field">
+                    <label class="form-label" for="prep_time_minutes">Prep Time (minutes)</label>
+                    <input class="recipe-input" type="number" name="prep_time_minutes" id="prep_time_minutes" min="0" placeholder="e.g., 15">
+                </div>
+                
+                <div class="field">
+                    <label class="form-label" for="cook_time_minutes">Cook Time (minutes)</label>
+                    <input class="recipe-input" type="number" name="cook_time_minutes" id="cook_time_minutes" min="0" placeholder="e.g., 45">
+                </div>
+
+                    <div class="field">
+                        <label class="form-label">Categories</label>
+                        <div>
+                        {% for category in categories %}
+                        <label style="margin-right: 1rem;">
+                        <input type="checkbox" name="categories" value="{{ category.id }}"> {{ category.name }}
+                    </label>
+                    {% endfor %}
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="form-label">Tags</label>
+                    <div>
+                    {% for tag in tags %}
+                    <label style="margin-right: 1rem;">
+                        <input type="checkbox" name="tags" value="{{ tag.id }}"> {{ tag.name }}
+                    </label>
+                    {% endfor %}
+                    </div>
+                </div>
+                 
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <div style="color:red; margin-bottom:1rem;">
+                        {% for message in messages %}
+                            <p>{{ message }}</p>
+                        {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
 
                 <div class="has-text-centered mt-4">
                     <button type="submit" class="btn-pill" style="width: 100%; cursor: pointer;">

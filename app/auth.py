@@ -1,12 +1,15 @@
 import functools
+import random
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
 from app.models import User
+from datetime import datetime
+from app.email import send_otp_email
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-
+#comment
 @bp.route('/register', methods=('GET', 'POST'))
 def register():
     """Register a new user."""
@@ -98,3 +101,47 @@ def curator_required(view):
             return redirect(url_for('index'))
         return view(**kwargs)
     return wrapped_view
+
+@bp.route('/forgot-password', methods=('GET','POST'))
+def forgot_password():
+    if request.method == 'POST':
+        email =  request.form['email']
+        user = User.get_by_email(email)
+
+        if user:
+            otp = str(random.randint(100000,999999))
+            User.set_reset_code(user['id'], otp)
+            send_otp_email(email, otp)
+
+        flash('If an account with that email exists, a reset code has been sent.')
+        return redirect(url_for('auth.reset_password', email=email))
+        
+    return render_template('auth/forgot_password.html')
+
+@bp.route('/reset-password', methods=('GET', 'POST'))
+def reset_password():
+    email = request.args.get('email','')
+
+    if request.method == 'POST':
+        email = request.form['email']
+        code = request.form['code']
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+
+        if password != confirm_password:
+            flash('Passwords do not match')
+            return render_template('auth/reset_password.html', email=email)
+
+        user = User.get_by_email(email)
+
+        if user is None or user['reset_code'] != code:
+            flash('Invaild email or reset code.')
+        else:
+            expires = datetime.strptime(user['reset_code_expires'], '%Y-%m-%d %H:%M:%S')
+            if datetime.utcnow() > expires:
+                flash('The reset code has expired. Please request a new one.')
+            else:
+                User.reset_password(user['id'], password)
+                flash('Your password has been reset successfully. You can now log in.')
+                return redirect(url_for('auth.login'))
+    return render_template('auth/reset_password.html', email=email)
