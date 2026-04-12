@@ -5,26 +5,136 @@
     .recipe-main-card { background-color: var(--cream); border: 3px solid var(--border-dark); border-radius: 30px; padding: 2.5rem; margin-bottom: 2rem; }
     .item-row { background-color: white; border: 2px solid var(--border-dark); border-radius: 50px; padding: 12px 25px; margin-bottom: 1rem; display: flex; align-items: center; gap: 15px; font-weight: bold; }
     .step-num { background-color: var(--pill-green); min-width: 35px; height: 35px; border: 2px solid var(--border-dark); border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+    .meta-pill { display: inline-block; background-color: white; border: 2px solid var(--border-dark); border-radius: 20px; padding: 6px 14px; margin: 0 10px 10px 0; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .section-title { font-family: 'Georgia', serif; text-transform: uppercase; border-bottom: 2px solid var(--border-dark); display: inline-block; margin-bottom: 1rem; }
+    .social-card { background-color: white; border: 2px solid var(--border-dark); border-radius: 20px; padding: 1rem 1.25rem; margin-bottom: 1rem; }
+    .subtle-meta { text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; font-weight: bold; opacity: 0.7; }
+    .action-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.5rem; }
+    .action-form { margin: 0; }
 </style>
+
 <div class="recipe-main-card">
     <h1 style="font-family: 'Georgia', serif; text-transform: uppercase; font-size: 2.5rem;">{{ recipe.title }}</h1>
     <p>By {{ recipe.author_name|upper }} | {{ recipe.template_type|replace('_', ' ')|upper }}</p>
+
+    {% if recipe.description %}
+    <p style="margin-top: 1rem; line-height: 1.6;">{{ recipe.description }}</p>
+    {% endif %}
+
+    <div style="margin-top: 1.5rem;">
+        {% if recipe.base_servings %}
+        <span class="meta-pill">Serves {{ recipe.base_servings }}</span>
+        {% endif %}
+        {% if recipe.prep_time_minutes is not none %}
+        <span class="meta-pill">Prep {{ recipe.prep_time_minutes }} min</span>
+        {% endif %}
+        {% if recipe.cook_time_minutes is not none %}
+        <span class="meta-pill">Cook {{ recipe.cook_time_minutes }} min</span>
+        {% endif %}
+    </div>
+
+    {% if categories %}
+    <div style="margin-top: 1rem;">
+        <p class="subtle-meta" style="margin-bottom: 0.5rem;">Categories</p>
+        {% for category in categories %}
+        <span class="meta-pill">{{ category.name }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if tags %}
+    <div style="margin-top: 1rem;">
+        <p class="subtle-meta" style="margin-bottom: 0.5rem;">Tags</p>
+        {% for tag in tags %}
+        <span class="meta-pill">{{ tag.name }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if g.user %}
+    <div class="action-row">
+        <form method="post" action="{{ url_for('recipes.save', id=recipe.id) }}" class="action-form">
+            <button type="submit" class="btn-pill">
+                {% if is_saved %}Unsave Recipe{% else %}Save Recipe{% endif %}
+            </button>
+        </form>
+        <form method="post" action="{{ url_for('recipes.fork', id=recipe.id) }}" class="action-form">
+            <button type="submit" class="btn-pill is-white">
+                Fork Recipe
+            </button>
+        </form>
+        {% if g.user['id'] == recipe.author_id %}
+        <a href="{{ url_for('recipes.edit_ingredients', id=recipe.id) }}" class="btn-pill" style="text-decoration: none;">
+            Edit Recipe
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
+
 <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px;">
     <div class="recipe-main-card">
-        <h2 style="font-family: 'Georgia', serif; text-transform: uppercase; border-bottom: 2px solid var(--border-dark); display: inline-block;">Ingredients</h2>
+        <h2 class="section-title">Ingredients</h2>
         {% for ing in ingredients %}
-        <div class="item-row">{{ ing.quantity }} {{ ing.abbreviation or ing.unit_name }} {{ ing.name }}</div>
+        <div class="item-row">
+            <span>{{ ing.quantity }} {{ ing.abbreviation or ing.unit_name }} {{ ing.name }}</span>
+            {% if ing.allergen_name %}
+            <span class="meta-pill" style="margin: 0 0 0 auto;">{{ ing.allergen_name }}</span>
+            {% endif %}
+        </div>
+        {% else %}
+        <p>No ingredients added yet.</p>
         {% endfor %}
     </div>
     <div class="recipe-main-card">
-        <h2 style="font-family: 'Georgia', serif; text-transform: uppercase; border-bottom: 2px solid var(--border-dark); display: inline-block;">Instructions</h2>
+        <h2 class="section-title">Instructions</h2>
         {% for step in instructions %}
         <div class="item-row" style="border-radius: 20px; align-items: flex-start;">
             <div class="step-num">{{ step.step_number }}</div>
             <div style="padding-top: 5px;">{{ step.content }}</div>
         </div>
+        {% else %}
+        <p>No instructions added yet.</p>
         {% endfor %}
+    </div>
+</div>
+
+<div class="columns">
+    <div class="column is-6">
+        <div class="recipe-main-card">
+            <h2 class="section-title">Reviews</h2>
+            {% for review in reviews %}
+            <div class="social-card">
+                <div style="display: flex; justify-content: space-between; gap: 12px; align-items: center;">
+                    <strong>{{ review.username }}</strong>
+                    <span class="meta-pill" style="margin: 0;">{{ review.rating }}/5</span>
+                </div>
+                {% if review.comment %}
+                <p style="margin-top: 0.75rem; line-height: 1.6;">{{ review.comment }}</p>
+                {% endif %}
+                <p class="subtle-meta" style="margin-top: 0.75rem;">{{ review.created_at }}</p>
+            </div>
+            {% else %}
+            <p>No reviews yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="column is-6">
+        <div class="recipe-main-card">
+            <h2 class="section-title">Comments</h2>
+            {% for comment in comments %}
+            <div class="social-card">
+                <div style="display: flex; justify-content: space-between; gap: 12px; align-items: center;">
+                    <strong>{{ comment.username }}</strong>
+                    <span class="subtle-meta">{{ comment.created_at }}</span>
+                </div>
+                <p style="margin-top: 0.75rem; line-height: 1.6;">{{ comment.content }}</p>
+            </div>
+            {% else %}
+            <p>No comments yet.</p>
+            {% endfor %}
+        </div>
     </div>
 </div>
 {% endblock %}

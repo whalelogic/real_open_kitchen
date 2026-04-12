@@ -16,8 +16,25 @@ def index():
     }
     
     recipes = Recipe.get_all_public(filters)
+    from app.db import get_db
+    db = get_db()
     categories = Category.get_all()
-    return render_template('recipes/index.html', recipes=recipes, categories=categories)
+    tags = Tag.get_all()
+    authors = db.execute(
+        'SELECT DISTINCT u.id, u.username '
+        'FROM users u '
+        'JOIN recipes r ON r.author_id = u.id '
+        'WHERE r.is_public = 1 '
+        'ORDER BY u.username'
+    ).fetchall()
+    return render_template(
+        'recipes/index.html',
+        recipes=recipes,
+        categories=categories,
+        tags=tags,
+        authors=authors,
+        filters=filters,
+    )
 
 
 @bp.route('/<int:id>')

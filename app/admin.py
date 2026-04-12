@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from app.models import User, Unit, Allergen, ActivityLog, Report
+from app.models import User, Unit, Allergen, ActivityLog, Report, Role
 from app.auth import curator_required
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -17,7 +17,8 @@ def index():
 def users():
     """Manage users."""
     all_users = User.get_all()
-    return render_template('admin/users.html', users=all_users)
+    roles = Role.get_all()
+    return render_template('admin/users.html', users=all_users, roles=roles)
 
 
 @bp.route('/users/<int:id>/toggle-notifications', methods=('POST',))
@@ -29,6 +30,21 @@ def toggle_notifications(id):
     else:
         flash("User not found.")
     
+    return redirect(url_for('admin.users'))
+
+
+@bp.route('/users/<int:id>/role', methods=('POST',))
+@curator_required
+def update_role(id):
+    """Update a user's role."""
+    role_id = request.form.get('role_id', type=int)
+
+    if role_id is None:
+        flash('Please choose a valid role.')
+    else:
+        User.update_role(id, role_id)
+        flash('User role updated.')
+
     return redirect(url_for('admin.users'))
 
 

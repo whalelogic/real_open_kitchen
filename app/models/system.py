@@ -27,6 +27,36 @@ class Notification:
             (user_id, limit)
         ).fetchall()
 
+    @staticmethod
+    def mark_read(notification_id, user_id):
+        """Mark a notification as read for a specific user."""
+        db = get_db()
+        db.execute(
+            'UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?',
+            (notification_id, user_id)
+        )
+        db.commit()
+
+    @staticmethod
+    def mark_all_read(user_id):
+        """Mark all notifications as read for a user."""
+        db = get_db()
+        db.execute(
+            'UPDATE notifications SET is_read = 1 WHERE user_id = ? AND is_read = 0',
+            (user_id,)
+        )
+        db.commit()
+
+    @staticmethod
+    def delete(notification_id, user_id):
+        """Delete a notification for a specific user."""
+        db = get_db()
+        db.execute(
+            'DELETE FROM notifications WHERE id = ? AND user_id = ?',
+            (notification_id, user_id)
+        )
+        db.commit()
+
 
 class ActivityLog:
     """Activity log model."""

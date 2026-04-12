@@ -61,21 +61,60 @@
         letter-spacing: 1px;
         opacity: 0.7;
     }
+
+    .mini-action {
+        background: none;
+        border: 1px solid var(--border-dark);
+        border-radius: 999px;
+        padding: 5px 10px;
+        font-size: 0.65rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        color: var(--border-dark);
+    }
+
+    .mini-action:hover {
+        background-color: var(--pill-green);
+    }
 </style>
 
 <h1 class="dashboard-title">My Kitchen</h1>
 
 {% if notifications %}
 <div class="section-box">
-    <h2 class="section-heading">Recent Notifications</h2>
+    <div class="section-heading">
+        <span>Recent Notifications</span>
+        <form method="post" action="{{ url_for('dashboard.mark_all_notifications_read') }}">
+            <button type="submit" class="btn-pill is-small">Mark All Read</button>
+        </form>
+    </div>
     {% for notif in notifications %}
     <div class="notif-item {% if not notif.is_read %}notif-unread{% else %}notif-read{% endif %}">
-        <div class="level is-mobile">
+        <div class="level is-mobile" style="align-items: flex-start;">
             <div class="level-left">
-                <p>{{ notif.message }}</p>
+                <div>
+                    <p>{{ notif.message }}</p>
+                    {% if notif.reference_id %}
+                    <a href="{{ url_for('recipes.view', id=notif.reference_id) }}" class="meta-label" style="display: inline-block; margin-top: 8px; text-decoration: underline;">Open Recipe</a>
+                    {% endif %}
+                </div>
             </div>
             <div class="level-right">
-                <small class="meta-label">{{ notif.created_at }}</small>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <small class="meta-label">{{ notif.created_at }}</small>
+                    <div style="display: flex; gap: 8px;">
+                        {% if not notif.is_read %}
+                        <form method="post" action="{{ url_for('dashboard.mark_notification_read', id=notif.id) }}">
+                            <button type="submit" class="mini-action">Mark Read</button>
+                        </form>
+                        {% endif %}
+                        <form method="post" action="{{ url_for('dashboard.delete_notification', id=notif.id) }}">
+                            <button type="submit" class="mini-action">Dismiss</button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -148,6 +187,32 @@
             {% else %}
             <p class="meta-label">Your saved list is empty.</p>
             {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="section-box">
+    <div class="section-heading">
+        <span>My Settings</span>
+    </div>
+    <div class="columns is-vcentered">
+        <div class="column is-8">
+            <p style="font-weight: bold;">Notification Emails & Alerts</p>
+            <p class="meta-label" style="margin-top: 6px;">
+                Status:
+                {% if g.user.notifications_enabled %}
+                Active
+                {% else %}
+                Muted
+                {% endif %}
+            </p>
+        </div>
+        <div class="column is-4 has-text-right">
+            <form method="post" action="{{ url_for('dashboard.toggle_my_notifications') }}">
+                <button type="submit" class="btn-pill">
+                    {% if g.user.notifications_enabled %}Mute Notifications{% else %}Enable Notifications{% endif %}
+                </button>
+            </form>
         </div>
     </div>
 </div>

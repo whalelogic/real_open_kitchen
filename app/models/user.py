@@ -69,6 +69,16 @@ class User:
         return False
 
     @staticmethod
+    def update_role(user_id, role_id):
+        """Update a user's role."""
+        db = get_db()
+        db.execute(
+            'UPDATE users SET role_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+            (role_id, user_id)
+        )
+        db.commit()
+
+    @staticmethod
     def get_by_email(email):
         """Get user by email"""
         db = get_db()
