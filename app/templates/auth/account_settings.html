@@ -43,6 +43,10 @@
       <input type="password" id="confirm_password" name="confirm_password" required>
 
       <button type="submit" class="btn">Change Password</button>
+      <p style="margin-top: 0.75rem; font-size: 0.85rem;">
+            <a href="{{ url_for('auth.forgot_password') }}">Forgot your current password?</a>
+      </p>
+      
     </form>
   </section>
 
