@@ -111,10 +111,10 @@ class User:
     def update_profile(user_id, username, email):
         db = get_db()
         db.execute(
-        'UPDATE users SET username = ?, email = ? WHERE id = ?',
-        (username, email, user_id)
-    )
-    db.commit()
+            'UPDATE users SET username = ?, email = ? WHERE id = ?',
+            (username, email, user_id)
+        )
+        db.commit()
         
 
 class Role:
