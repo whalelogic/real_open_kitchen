@@ -6,6 +6,7 @@
     <title>{% block title %}Open Kitchen{% endblock %}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     
     <style>
         :root {
@@ -114,8 +115,47 @@
             color: var(--border-dark);
             font-weight: bold;
         }
-        
+
+        /* User Menu Dropdown styling */
+        .user-menu { position: relative; display: inline-block}
+        .user-menu-toggle {
+            background: none; 
+            border: 1px solid var(--cream); 
+            color: var(--cream);
+            padding: 6px 12px;
+            border-radius: 50px; 
+            cursor: pointer; 
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .user-dropdown {
+            display: none; 
+            position: absolute; 
+            right: 0; 
+            background: var(--cream);
+            border: 2px solid var(--border-dark); 
+            border-radius: 12px; 
+            min-width: 180px;
+            box-shadow: 4px 4px 0px var(--border-dark); 
+            list-style: none;
+            padding: 6px 0; 
+            margin: 4px 0 0 0; 
+            z-index: 100; 
+        }
+
+        .user-dropdown li a { 
+            display: block; 
+            padding: 8px 16px; 
+            color: var(--border-dark);
+        }
+        .user-dropdown li a:hover { background: var(--pill-green); }
+        .user-dropdown .divider { border-top: 1px solid var(--border-dark); margin: 4px 0; }
+        .user-menu:hover .user-dropdown { display: block; }
+
+
     </style>
+    
 </head>
 <body>
     <nav class="navbar" role="navigation" aria-label="main navigation">
@@ -139,14 +179,27 @@
                     {% endif %}
                 </div>
 
+
+
+
                 <div class="navbar-end">
                     {% if g.user %}
                     <div class="navbar-item">
+                        <div class="user-menu">
+                            <div class ="avatar" title="{{ g.user['username'] }}">
+                                {{ g.user['username'][0].upper() }}
+                            </div>
+                            <ul class="user-dropdown">
+                                <li><a href="{{ url_for('dashboard.index') }}">🍳 My Kitchen</a></li>
+                                <li><a href="{{ url_for('auth.account_settings') }}">⚙️ Account Settings</a></li>
+                                <li class="divider"></li>
+                                <li><a href="{{ url_for('auth.logout') }}"> Log Out</a></li>
+                            </ul>
+                </div>
                         <div class="avatar" title="{{ g.user['username'] }}">
                             {{ g.user['username'][0].upper() }}
                         </div>
                     </div>
-                    <a class="navbar-item" href="{{ url_for('auth.logout') }}">Logout</a>
                     {% else %}
                     <a class="navbar-item" href="{{ url_for('auth.register') }}">Register</a>
                     <a class="navbar-item" href="{{ url_for('auth.login') }}">Login</a>

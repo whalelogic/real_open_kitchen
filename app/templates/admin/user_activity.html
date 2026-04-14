@@ -72,7 +72,7 @@
         <h1 class="admin-title">User Activity Report</h1>
     </div>
     <div class="level-right">
-        <a href="{{ url_for('admin.index') }}" class="btn-pill" style="background-color: transparent; color: var(--cream); border-color: var(--cream);">
+        <a href="{{ url_for('admin.index') }}" class="btn-pill is-outline-light">
             BACK TO ADMIN
         </a>
     </div>
@@ -96,7 +96,7 @@
                 <tr>
                     <td>
                         <div class="is-flex is-align-items-center">
-                            <div class="avatar mr-3" style="width: 32px; height: 32px; font-size: 0.9rem;">
+                            <div class="avatar is-medium mr-3">
                                 {{ user.username[0].upper() }}
                             </div>
                             <span style="font-weight: bold; color: var(--border-dark);">{{ user.username }}</span>

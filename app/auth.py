@@ -145,3 +145,53 @@ def reset_password():
                 flash('Your password has been reset successfully. You can now log in.')
                 return redirect(url_for('auth.login'))
     return render_template('auth/reset_password.html', email=email)
+
+
+@bp.route('/account-settings', methods=('GET', 'POST'))
+@login_required
+
+# Allows users to update their email and/or password. 
+
+def account_settings():
+
+    error = None
+    success = None
+    
+    if request.method == 'POST':
+        action = request.form.get('action')
+
+        if action == 'update_profile':
+            username = request.form['username'].strip()
+            email = request.form['email'].strip()
+            if not username:
+                error = 'Username cannot be empty.'
+            elif not email:
+                error = 'Email cannot be empty.'
+            else:
+                try:
+                    User.update_profile(g.user['id'], username, email)
+                    success = 'Profile updated successfully.'
+                    g.user = User.get_by_id(g.user['id'])  # refresh
+                except Exception:
+                    error = 'That username or email is already taken.'
+
+        elif action == 'change_password':
+            current = request.form['current_password']
+            new_pw = request.form['new_password']
+            confirm = request.form['confirm_password']
+            if not User.verify_password(g.user, current):
+                error = 'Current password is incorrect.'
+            elif new_pw != confirm:
+                error = 'New passwords do not match.'
+            elif len(new_pw) < 6:
+                error = 'Password must be at least 6 characters.'
+            else:
+                User.reset_password(g.user['id'], new_pw)
+                success = 'Password changed successfully.'
+
+    if error:
+        flash(error)
+    if success:
+        flash(success)
+
+    return render_template('auth/account_settings.html')

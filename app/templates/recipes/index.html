@@ -4,12 +4,11 @@
 
 {% block content %}
 <style>
-    /* 1. Fix the Category Spacing */
     .category-list {
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 1.5rem; /* This puts space between the words */
+        gap: 1.5rem;
         margin: 1.5rem 0;
     }
 
@@ -25,19 +24,17 @@
         text-decoration: underline;
     }
 
-    /* 2. Fix the "Recent Additions" Dark Section */
     .recent-section {
-        color: var(--cream); /* Makes general text cream */
-        margin-top: 4rem;
+        color: var(--cream);
+        margin-top: 2rem;
     }
 
     .recipe-entry {
         margin-bottom: 2.5rem;
     }
 
-    /* Fix the blue link issue */
     .recipe-entry a {
-        color: var(--pill-green) !important; /* High contrast green/yellow */
+        color: var(--pill-green) !important;
         font-family: 'Georgia', serif;
         font-size: 1.2rem;
         font-weight: bold;
@@ -62,38 +59,122 @@
         line-height: 1.4;
         margin: 0.5rem 0;
     }
+
+    .filter-card {
+        background-color: var(--cream);
+        border: 3px solid var(--border-dark);
+        border-radius: 40px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .filter-label {
+        display: block;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .filter-input {
+        width: 100%;
+        border: 2px solid var(--border-dark);
+        border-radius: 14px;
+        padding: 12px;
+        background-color: white;
+        font-family: inherit;
+    }
+
+    .result-pill {
+        display: inline-block;
+        border: 2px solid var(--pill-green);
+        border-radius: 20px;
+        padding: 5px 14px;
+        color: var(--cream);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: bold;
+        margin-right: 0.5rem;
+    }
 </style>
 
-<div class="box has-text-centered" style="background-color: var(--cream); border: 3px solid var(--border-dark); border-radius: 40px; padding: 3rem;">
-    <h2 style="font-family: 'Georgia', serif; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; margin-bottom: 1rem;">Browse Categories</h2>
-    
-    <div class="category-list">
-        {% for cat in categories %}
-            <a href="{{ url_for('recipes.index', category=cat.id) }}" class="category-link">{{ cat.name }}</a>
-        {% endfor %}
-        <a href="{{ url_for('recipes.index') }}" class="btn-pill" style="padding: 5px 15px; font-size: 0.8rem;">VIEW ALL →</a>
-    </div>
+<div class="filter-card">
+    <h2 style="font-family: 'Georgia', serif; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; margin-bottom: 1.5rem; text-align: center;">Browse Recipes</h2>
+
+    <form method="get">
+        <div class="columns is-multiline">
+            <div class="column is-4">
+                <label class="filter-label" for="search">Search</label>
+                <input class="filter-input" type="text" name="search" id="search" value="{{ filters.search or '' }}" placeholder="Title or description">
+            </div>
+            <div class="column is-4">
+                <label class="filter-label" for="author">Author</label>
+                <div class="select is-fullwidth">
+                    <select class="filter-input" name="author" id="author">
+                        <option value="">All authors</option>
+                        {% for author in authors %}
+                        <option value="{{ author.id }}" {% if filters.author and filters.author|int == author.id %}selected{% endif %}>{{ author.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="column is-4">
+                <label class="filter-label" for="tag">Tag</label>
+                <div class="select is-fullwidth">
+                    <select class="filter-input" name="tag" id="tag">
+                        <option value="">All tags</option>
+                        {% for tag in tags %}
+                        <option value="{{ tag.id }}" {% if filters.tag and filters.tag|int == tag.id %}selected{% endif %}>{{ tag.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="column is-12">
+                <label class="filter-label">Browse Categories</label>
+                <div class="category-list" style="justify-content: flex-start; margin-top: 0.5rem;">
+                    {% for cat in categories %}
+                    <a href="{{ url_for('recipes.index', category=cat.id, search=filters.search, tag=filters.tag, author=filters.author) }}" class="category-link" {% if filters.category and filters.category|int == cat.id %}style="text-decoration: underline;"{% endif %}>{{ cat.name }}</a>
+                    {% endfor %}
+                    <a href="{{ url_for('recipes.index', search=filters.search, tag=filters.tag, author=filters.author) }}" class="btn-pill is-compact">Clear Category</a>
+                </div>
+            </div>
+            <div class="column is-12">
+                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <button type="submit" class="btn-pill">Apply Filters</button>
+                    <a href="{{ url_for('recipes.index') }}" class="btn-pill is-white" style="text-decoration: none;">Reset</a>
+                </div>
+            </div>
+        </div>
+    </form>
 </div>
 
 <div class="recent-section">
     <div class="level is-mobile mb-6">
         <div class="level-left">
-            <h2 style="font-family: 'Georgia', serif; text-transform: uppercase; font-size: 2rem; font-weight: bold;">Recent Additions</h2>
+            <h2 style="font-family: 'Georgia', serif; text-transform: uppercase; font-size: 2rem; font-weight: bold;">Recipe Results</h2>
         </div>
         <div class="level-right">
-            <a href="#" style="color: var(--cream); font-weight: bold; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Browse All →</a>
+            <span class="result-pill">{{ recipes|length }} found</span>
         </div>
     </div>
 
     <div class="columns is-multiline">
         {% for recipe in recipes %}
-            <div class="column is-4 recipe-entry">
-                <a href="{{ url_for('recipes.view', id=recipe.id) }}">
-                    {{ recipe.title }}
-                </a>
-                <p class="recipe-description">{{ recipe.description[:100] if recipe.description else '' }}{% if recipe.description and recipe.description|length > 100 %}...{% endif %}</p>
-                <span class="author-tag">By {{ recipe.author_name }}</span>
+        <div class="column is-4 recipe-entry">
+            <a href="{{ url_for('recipes.view', id=recipe.id) }}">
+                {{ recipe.title }}
+            </a>
+            <p class="recipe-description">{{ recipe.description[:100] if recipe.description else '' }}{% if recipe.description and recipe.description|length > 100 %}...{% endif %}</p>
+            <span class="author-tag">By {{ recipe.author_name }}</span>
+        </div>
+        {% else %}
+        <div class="column is-12">
+            <div class="filter-card" style="padding: 2rem; text-align: center;">
+                <p style="font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">No recipes match those filters.</p>
             </div>
+        </div>
         {% endfor %}
     </div>
 </div>

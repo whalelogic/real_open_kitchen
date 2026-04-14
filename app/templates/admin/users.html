@@ -95,7 +95,7 @@
         <h1 class="admin-title">User Management</h1>
     </div>
     <div class="level-right">
-        <a href="{{ url_for('admin.index') }}" class="btn-pill" style="background-color: transparent; color: var(--cream); border-color: var(--cream);">
+        <a href="{{ url_for('admin.index') }}" class="btn-pill is-outline-light">
             BACK TO ADMIN
         </a>
     </div>
@@ -110,6 +110,7 @@
                     <th>Email Address</th>
                     <th>Access Level</th>
                     <th style="text-align: center;">Notifications</th>
+                    <th style="text-align: center;">Role Control</th>
                     <th style="text-align: center;">Actions</th>
                 </tr>
             </thead>
@@ -118,7 +119,7 @@
                 <tr>
                     <td>
                         <div class="is-flex is-align-items-center">
-                            <div class="avatar mr-3" style="width: 30px; height: 30px; font-size: 0.8rem;">
+                            <div class="avatar is-small mr-3">
                                 {{ user.username[0].upper() }}
                             </div>
                             <span style="font-weight: bold;">{{ user.username }}</span>
@@ -136,6 +137,20 @@
                         {% else %}
                         <span class="notif-disabled">MUTED</span>
                         {% endif %}
+                    </td>
+                    <td style="text-align: center;">
+                        <form method="post" action="{{ url_for('admin.update_role', id=user.id) }}" style="display: flex; gap: 8px; align-items: center; justify-content: center;">
+                            <div class="select is-small">
+                                <select name="role_id" style="border: 1px solid var(--border-dark); border-radius: 6px;">
+                                    {% for role in roles %}
+                                    <option value="{{ role.id }}" {% if role.id == user.role_id %}selected{% endif %}>{{ role.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-action">
+                                SAVE ROLE
+                            </button>
+                        </form>
                     </td>
                     <td style="text-align: center;">
                         <form method="post" action="{{ url_for('admin.toggle_notifications', id=user.id) }}">

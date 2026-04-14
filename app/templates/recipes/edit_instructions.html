@@ -38,7 +38,7 @@
 {% endif %}
 
 <div style="margin-top: 2rem; display: flex; gap: 15px;">
-    <a href="{{ url_for('recipes.view', id=recipe.id) }}" class="btn-pill" style="background-color: white;">DONE</a>
+    <a href="{{ url_for('recipes.view', id=recipe.id) }}" class="btn-pill is-white">DONE</a>
     <a href="{{ url_for('recipes.edit_ingredients', id=recipe.id) }}" style="text-decoration: none; color: var(--cream); font-weight: bold; align-self: center;">BACK TO INGREDIENTS</a>
 </div>
 

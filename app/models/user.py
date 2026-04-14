@@ -1,5 +1,6 @@
 """User and Role models for authentication and authorization."""
 from werkzeug.security import check_password_hash, generate_password_hash
+from app import db
 from app.db import get_db
 from datetime import datetime
 
@@ -69,6 +70,16 @@ class User:
         return False
 
     @staticmethod
+    def update_role(user_id, role_id):
+        """Update a user's role."""
+        db = get_db()
+        db.execute(
+            'UPDATE users SET role_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+            (role_id, user_id)
+        )
+        db.commit()
+
+    @staticmethod
     def get_by_email(email):
         """Get user by email"""
         db = get_db()
@@ -93,6 +104,15 @@ class User:
         db.execute(
             'UPDATE users SET password_hash = ?, reset_code = NULL, reset_code_expires = NULL WHERE id = ?',
             (generate_password_hash(new_password), user_id)
+        )
+        db.commit()
+
+    @staticmethod
+    def update_profile(user_id, username, email):
+        db = get_db()
+        db.execute(
+            'UPDATE users SET username = ?, email = ? WHERE id = ?',
+            (username, email, user_id)
         )
         db.commit()
         
