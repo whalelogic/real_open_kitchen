@@ -133,6 +133,7 @@
             display: none; 
             position: absolute; 
             right: 0; 
+            top: 100%;
             background: var(--cream);
             border: 2px solid var(--border-dark); 
             border-radius: 12px; 
@@ -140,7 +141,7 @@
             box-shadow: 4px 4px 0px var(--border-dark); 
             list-style: none;
             padding: 6px 0; 
-            margin: 4px 0 0 0; 
+            margin: 0; 
             z-index: 100; 
         }
 
@@ -195,9 +196,6 @@
                                 <li class="divider"></li>
                                 <li><a href="{{ url_for('auth.logout') }}"> Log Out</a></li>
                             </ul>
-                </div>
-                        <div class="avatar" title="{{ g.user['username'] }}">
-                            {{ g.user['username'][0].upper() }}
                         </div>
                     </div>
                     {% else %}
