@@ -1,5 +1,6 @@
 import functools
 import random
+import re
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
@@ -9,6 +10,16 @@ from app.email import send_otp_email
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
+
+def is_password_strong(password):
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long."
+    if not re.search(r"[0-9]", password):
+        return False, "Password must contain at least one number."
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+        return False, "Password must contain at least one special character."
+    return True, ""
+
 #comment
 @bp.route('/register', methods=('GET', 'POST'))
 def register():
@@ -17,6 +28,8 @@ def register():
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
+        confirm_password = request.form['confirm_password']
+        db = get_db()
         error = None
 
         if not username:
@@ -25,6 +38,12 @@ def register():
             error = 'Email is required.'
         elif not password:
             error = 'Password is required.'
+        if password != confirm_password:
+            error = "Passwords do not match."
+        else:
+            is_strong, msg = is_password_strong(password)
+            if not is_strong:
+                error = msg
 
         if error is None:
             try:
@@ -48,9 +67,9 @@ def login():
         user = User.get_by_username(username)
 
         if user is None:
-            error = 'Incorrect username.'
+            error = 'Incorrect credentials.'
         elif not User.verify_password(user, password):
-            error = 'Incorrect password.'
+            error = 'Incorrect credentials.'
 
         if error is None:
             session.clear()
@@ -127,9 +146,16 @@ def reset_password():
         code = request.form['code']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
-
+        
+        # --- NEW CHECK 1: Match ---
         if password != confirm_password:
             flash('Passwords do not match')
+            return render_template('auth/reset_password.html', email=email)
+            
+        # --- NEW CHECK 2: Strength (Calling the helper) ---
+        is_strong, message = is_password_strong(password)
+        if not is_strong:
+            flash(message)
             return render_template('auth/reset_password.html', email=email)
 
         user = User.get_by_email(email)

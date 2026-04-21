@@ -11,7 +11,6 @@
         padding: 3rem 2rem;
         box-shadow: 10px 10px 0px var(--border-dark);
     }
-
     .auth-title {
         font-family: 'Georgia', serif;
         text-transform: uppercase;
@@ -20,7 +19,6 @@
         letter-spacing: 2px;
         color: var(--border-dark);
     }
-
     .form-label {
         text-transform: uppercase;
         font-size: 0.75rem;
@@ -29,7 +27,6 @@
         margin-bottom: 0.5rem;
         display: block;
     }
-
     .auth-input {
         width: 100%;
         padding: 12px;
@@ -39,18 +36,15 @@
         font-family: inherit;
         transition: border-color 0.2s;
     }
-
     .auth-input:focus {
         outline: none;
         border-color: var(--pill-green);
     }
-
     .auth-footer-text {
         font-size: 0.85rem;
         color: var(--border-dark);
         opacity: 0.8;
     }
-
     .auth-footer-text a {
         color: var(--forest-green);
         font-weight: bold;
@@ -58,12 +52,17 @@
     }
 </style>
 
+<div id="js-error-notify" class="notification is-danger" style="display: none; border-radius: 15px; margin-bottom: 1.5rem;">
+    <button class="delete" type="button" onclick="this.parentElement.style.display='none'"></button>
+    <span id="error-message"></span>
+</div>
+
 <div class="columns is-centered mt-6">
     <div class="column is-10-mobile is-8-tablet is-6-desktop is-5-widescreen">
         <div class="auth-card">
             <h2 class="auth-title has-text-centered mb-5">Register</h2>
             
-            <form method="post">
+            <form method="post" id="registerForm">
                 <input type="hidden" name="template_type" value="register">
 
                 <div class="field mb-4">
@@ -80,10 +79,27 @@
                     </div>
                 </div>
 
-                <div class="field mb-5">
+                <div class="field mb-4">
                     <label class="form-label" for="password">Password</label>
                     <div class="control">
-                        <input class="auth-input" type="password" name="password" id="password" placeholder="Create a strong password" required>
+                        <input class="auth-input" type="password" name="password" id="password" required oninput="checkPasswordStrength()">
+                    </div>
+                    
+                    <progress class="progress is-danger is-small mt-2" id="strength-bar" value="0" max="100"></progress>
+                    
+                    <small style="font-size: 0.75rem; display: block; margin-top: 10px; line-height: 1.6;">
+                        Must contain:<br>
+                        • <span id="req-length" style="color: #ff3860;">8+ Characters</span><br>
+                        • <span id="req-number" style="color: #ff3860;">1 Number</span><br>
+                        • <span id="req-symbol" style="color: #ff3860;">1 Symbol</span><br>
+                        • <span id="req-match" style="color: #ff3860;">Passwords Match</span>
+                    </small>
+                </div>
+                
+                <div class="field mb-5">
+                    <label class="form-label" for="confirm_password">Confirm Password</label>
+                    <div class="control">
+                        <input class="auth-input" type="password" name="confirm_password" id="confirm_password" required oninput="checkPasswordStrength()">
                     </div>
                 </div>
 
@@ -105,4 +121,68 @@
         </div>
     </div>
 </div>
+
+<script>
+function checkPasswordStrength() {
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm_password').value;
+    const bar = document.getElementById('strength-bar');
+    
+    let strength = 0;
+    const hasLength = password.length >= 8;
+    const hasNumber = /[0-9]/.test(password);
+    const hasSymbol = /[!@#$%^&*(),.?:{}|<>]/.test(password);
+    const matches = (password === confirm && password !== "");
+
+    document.getElementById('req-length').style.color = hasLength ? "#23d160" : "#ff3860";
+    document.getElementById('req-number').style.color = hasNumber ? "#23d160" : "#ff3860";
+    document.getElementById('req-symbol').style.color = hasSymbol ? "#23d160" : "#ff3860";
+    document.getElementById('req-match').style.color = matches ? "#23d160" : "#ff3860";
+
+    if (hasLength) strength += 34;
+    if (hasNumber) strength += 33;
+    if (hasSymbol) strength += 33;
+    bar.value = strength;
+
+    if (strength < 40) bar.className = "progress is-danger is-small mt-2";
+    else if (strength < 100) bar.className = "progress is-warning is-small mt-2";
+    else bar.className = "progress is-success is-small mt-2";
+}
+
+// Keep your checkPasswordStrength() function as is...
+
+document.getElementById('registerForm').onsubmit = function(e) {
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm_password').value;
+    const notify = document.getElementById('js-error-notify');
+    const errorText = document.getElementById('error-message');
+
+    // 1. Check all requirements
+    const hasLength = password.length >= 8;
+    const hasNumber = /[0-9]/.test(password);
+    const hasSymbol = /[!@#$%^&*(),.?:{}|<>]/.test(password);
+    const matches = (password === confirm && password !== "");
+
+    // 2. Build a list of what's missing
+    let missing = [];
+    if (!hasLength) missing.push("8+ characters");
+    if (!hasNumber) missing.push("a number");
+    if (!hasSymbol) missing.push("a symbol");
+    if (!matches) missing.push("matching passwords");
+
+
+	if (!hasLength || !hasNumber || !hasSymbol || !matches) {
+	            e.preventDefault(); 
+	            notify.style.display = 'block'; 
+	            
+	            if (!matches) {
+	                errorText.innerText = "Error: Passwords do not match.";
+	            } else {
+	                errorText.innerText = "Error: Please meet all security requirements.";
+	            }
+	            
+	            window.scrollTo(0, 0); 
+	        }    
+};
+</script>
 {% endblock %}
