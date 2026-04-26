@@ -186,7 +186,7 @@ def create():
                 image_prompt = f"Professional food photography of {title}. {description}. Beautifully plated, modern kitchen table setting, shallow depth of field, warm cinematic lighting, 4k resolution."
                 
                 # Replace 'AIza...' with your actual new Tier 1 key!
-                client = genai.Client(api_key="AIzaSyDhFCxMzEKU_1CaBDgBqUebw-apk_LH2m0")                
+                client = genai.Client()                
                 # Back to the modern SDK syntax! Your Tier 1 key will let this pass.
                 image_result = client.models.generate_content(
                     model='gemini-2.5-flash-image',
