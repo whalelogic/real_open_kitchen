@@ -169,6 +169,14 @@ class Recipe:
         ).fetchall()
     
     @staticmethod
+    def delete(recipe_id):
+        """Delete a recipe and all its associated data (via ON DELETE CASCADE)."""
+        db = get_db()
+        db.execute('DELETE FROM recipes WHERE id = ?', (recipe_id,))
+        db.commit()
+        return True
+
+    @staticmethod
     def get_stats():
         """Get recipe statistics."""
         db = get_db()

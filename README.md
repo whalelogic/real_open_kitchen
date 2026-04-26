@@ -6,6 +6,7 @@ A collaborative recipe management system designed for community and family envir
 
 - **User Authentication**: Secure registration and login system with role-based access (Contributor, Curator)
 - **Recipe Management**: Create, view, and fork recipes with structured ingredient data
+- **AI Recipe Generator**: Create recipes from natural language prompts using Google Gemini AI
 - **Dynamic Scaling**: Automatically scale ingredient quantities for different serving sizes
 - **Recipe Templates**: Support for Standard Recipes and Quick Tips
 - **Social Features**: Reviews, comments, and recipe saving
@@ -131,7 +132,18 @@ graph TB
    pip install -r requirements.txt
    ```
 
-4. **Initialize the database**:
+4. **Set up environment variables**:
+   
+   Create a `.env` file in the project root (or set environment variables):
+   
+   ```bash
+   # Required for AI Recipe Generation
+   export GEMINI_API_KEY=your_gemini_api_key_here
+   ```
+   
+   Get your Gemini API key from: [Google AI Studio](https://makersuite.google.com/app/apikey)
+
+5. **Initialize the database**:
    ```bash
    export FLASK_APP=app
    flask init-db
@@ -143,7 +155,13 @@ graph TB
    ```bash
    export FLASK_APP=app
    export FLASK_ENV=development  # Optional: enables debug mode
+   export GEMINI_API_KEY=your_api_key  # Required for AI features
    flask run
+   ```
+   
+   Or use the provided run script:
+   ```bash
+   ./run.sh
    ```
 
 2. **Access the application**:
@@ -190,6 +208,20 @@ sqlite3 instance/community_kitchen.db "UPDATE users SET role_id = 2 WHERE userna
 ```
 
 ## Key Features Implementation
+
+### AI Recipe Generator
+The application includes an AI-powered recipe generator using Google's Gemini API:
+
+- **Toggleable Sidebar**: Click the "AI Assistant" button on the recipe creation page
+- **Natural Language Input**: Describe your recipe idea in plain English
+- **Automated Creation**: AI generates title, description, ingredients with quantities, and step-by-step instructions
+- **Smart Population**: One-click to populate the recipe form with AI-generated content
+- **Seamless Integration**: Ingredients and instructions are automatically added to your recipe
+
+**Example prompts:**
+- "A creamy tomato pasta with basil and garlic for 4 people"
+- "Quick chocolate chip cookies that are crispy on the outside"
+- "Spicy Thai chicken curry with coconut milk"
 
 ### Recipe Forking
 Recipes can be forked to create personalized versions while maintaining lineage tracking via `parent_recipe_id`.

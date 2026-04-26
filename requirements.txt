@@ -14,3 +14,4 @@ requests==2.32.5
 urllib3==2.6.3
 Werkzeug==3.1.6
 WTForms==3.2.1
+google-genai>=0.3.0

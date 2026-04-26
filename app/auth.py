@@ -5,6 +5,7 @@ from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
 from app.models import User
+from app.db import get_db
 from datetime import datetime
 from app.email import send_otp_email
 

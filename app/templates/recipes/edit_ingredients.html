@@ -5,6 +5,14 @@
 <div class="form-card" style="background-color: var(--cream); border: 3px solid var(--border-dark); border-radius: 30px; padding: 2rem;">
     <h1 style="font-family: 'Georgia', serif; text-transform: uppercase;">Edit Ingredients</h1>
     
+    <div id="aiIngredientNotice" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 15px; margin: 1rem 0;">
+        <strong>✨ AI Generated Ingredients Ready!</strong>
+        <p style="margin: 0.5rem 0 0 0;">Click below to add all ingredients from your AI-generated recipe.</p>
+        <button onclick="addAIIngredients()" style="background: white; color: #667eea; border: none; border-radius: 50px; padding: 8px 20px; font-weight: bold; margin-top: 0.5rem; cursor: pointer;">
+            Add AI Ingredients
+        </button>
+    </div>
+    
     <!-- Form to add a new ingredient -->
     <form method="post" class="mt-4">
         <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px;">
@@ -47,4 +55,85 @@
         </div>
     {% endif %}
 </div>
+
+<script>
+// Check for AI-generated ingredients on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const aiIngredients = sessionStorage.getItem('ai_ingredients');
+    if (aiIngredients) {
+        document.getElementById('aiIngredientNotice').style.display = 'block';
+    }
+});
+
+async function addAIIngredients() {
+    const aiIngredients = JSON.parse(sessionStorage.getItem('ai_ingredients'));
+    if (!aiIngredients) return;
+    
+    // Map unit names to IDs
+    const unitMap = {
+        {% for unit in units %}
+        '{{ unit.name.lower() }}': {{ unit.id }},
+        '{{ unit.abbreviation.lower() }}': {{ unit.id }},
+        {% endfor %}
+    };
+    
+    const allergenMap = {
+        {% for allergen in allergens %}
+        '{{ allergen.name.lower() }}': {{ allergen.id }},
+        {% endfor %}
+    };
+    
+    let addedCount = 0;
+    
+    for (const ing of aiIngredients) {
+        const unitName = ing.unit.toLowerCase();
+        let unitId = unitMap[unitName];
+        
+        // Try to find a matching unit
+        if (!unitId) {
+            // Try partial matches
+            for (const [key, value] of Object.entries(unitMap)) {
+                if (key.includes(unitName) || unitName.includes(key)) {
+                    unitId = value;
+                    break;
+                }
+            }
+        }
+        
+        // Default to "pieces" if no match found
+        if (!unitId) {
+            unitId = unitMap['piece'] || unitMap['pieces'] || 1;
+        }
+        
+        let allergenId = null;
+        if (ing.allergen) {
+            allergenId = allergenMap[ing.allergen.toLowerCase()];
+        }
+        
+        // Create form data
+        const formData = new FormData();
+        formData.append('name', ing.name);
+        formData.append('quantity', ing.quantity);
+        formData.append('unit_id', unitId);
+        if (allergenId) {
+            formData.append('allergen_id', allergenId);
+        }
+        
+        try {
+            await fetch(window.location.href, {
+                method: 'POST',
+                body: formData
+            });
+            addedCount++;
+        } catch (error) {
+            console.error('Failed to add ingredient:', ing.name, error);
+        }
+    }
+    
+    // Clear the session storage and reload page
+    sessionStorage.removeItem('ai_ingredients');
+    alert(`Successfully added ${addedCount} ingredients!`);
+    window.location.reload();
+}
+</script>
 {% endblock %}

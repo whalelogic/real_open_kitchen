@@ -9,8 +9,9 @@
         border: 3px solid var(--border-dark);
         border-radius: 30px;
         padding: 3rem;
-        box-shadow: 10px 10px 0px var(--border-dark); /* Match the Auth style */
+        box-shadow: 10px 10px 0px var(--border-dark);
         margin-top: 3rem;
+        position: relative;
     }
 
     .recipe-title {
@@ -49,6 +50,257 @@
     .recipe-input:focus, .recipe-textarea:focus {
         outline: none;
         border-color: var(--pill-green);
+    }
+
+    /* AI Sidebar Styles */
+    .ai-toggle-btn {
+        position: fixed;
+        right: 20px;
+        top: 120px;
+        z-index: 1000;
+        background-color: var(--pill-green);
+        color: var(--border-dark);
+        border: 3px solid var(--border-dark);
+        border-radius: 50px;
+        padding: 12px 25px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 5px 5px 0px var(--border-dark);
+        transition: all 0.2s;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .ai-toggle-btn:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 7px 7px 0px var(--border-dark);
+        background-color: var(--cream);
+    }
+
+    .ai-toggle-btn i {
+        margin-right: 8px;
+    }
+
+    .ai-sidebar {
+        position: fixed;
+        right: -450px;
+        top: 0;
+        width: 450px;
+        height: 100vh;
+        background-color: var(--forest-green);
+        border-left: 5px solid var(--border-dark);
+        box-shadow: -5px 0 25px rgba(0,0,0,0.3);
+        transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 999;
+        display: flex;
+        flex-direction: column;
+        color: var(--cream);
+    }
+
+    .ai-sidebar.active {
+        right: 0;
+    }
+
+    .ai-sidebar-header {
+        padding: 2rem;
+        border-bottom: 2px solid rgba(253, 250, 241, 0.2);
+    }
+
+    .ai-sidebar-header h2 {
+        font-family: 'Georgia', serif;
+        font-size: 1.8rem;
+        margin: 0;
+        font-weight: bold;
+        color: var(--pill-green);
+    }
+
+    .ai-sidebar-header p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+        font-size: 0.9rem;
+        color: var(--cream);
+    }
+
+    .ai-sidebar-content {
+        flex: 1;
+        padding: 2rem;
+        overflow-y: auto;
+    }
+
+    .ai-prompt-input {
+        width: 100%;
+        min-height: 120px;
+        padding: 15px;
+        border: 2px solid var(--border-dark);
+        border-radius: 15px;
+        background: var(--cream);
+        color: var(--border-dark);
+        font-family: inherit;
+        font-size: 1rem;
+        resize: vertical;
+    }
+
+    .ai-prompt-input::placeholder {
+        color: rgba(26, 38, 29, 0.5);
+    }
+
+    .ai-prompt-input:focus {
+        outline: none;
+        border-color: var(--pill-green);
+        box-shadow: 0 0 0 3px rgba(141, 164, 126, 0.3);
+    }
+
+    .ai-generate-btn {
+        width: 100%;
+        background-color: var(--pill-green);
+        color: var(--border-dark);
+        border: 3px solid var(--border-dark);
+        border-radius: 50px;
+        padding: 15px;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-top: 1rem;
+        transition: all 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 4px 4px 0px var(--border-dark);
+    }
+
+    .ai-generate-btn:hover:not(:disabled) {
+        transform: translate(-2px, -2px);
+        box-shadow: 6px 6px 0px var(--border-dark);
+        background-color: var(--cream);
+    }
+
+    .ai-generate-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+    }
+
+    .ai-result {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: rgba(253, 250, 241, 0.1);
+        border: 2px solid var(--pill-green);
+        border-radius: 15px;
+        display: none;
+    }
+
+    .ai-result.show {
+        display: block;
+    }
+
+    .ai-result h3 {
+        margin: 0 0 1rem 0;
+        font-size: 1.2rem;
+        color: var(--pill-green);
+        font-family: 'Georgia', serif;
+        font-weight: bold;
+    }
+
+    .ai-result-content {
+        max-height: 300px;
+        overflow-y: auto;
+        color: var(--cream);
+    }
+
+    .ai-error {
+        background: rgba(255, 59, 48, 0.2);
+        border: 1px solid #ff3b30;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-top: 1rem;
+        display: none;
+        color: #ff3b30;
+    }
+
+    .ai-error.show {
+        display: block;
+    }
+
+    .ai-loading {
+        display: none;
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+    .ai-loading.show {
+        display: block;
+    }
+
+    .ai-loading-spinner {
+        border: 3px solid rgba(253, 250, 241, 0.3);
+        border-top: 3px solid var(--pill-green);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .ai-use-btn {
+        background: var(--pill-green);
+        color: var(--border-dark);
+        border: 2px solid var(--border-dark);
+        border-radius: 50px;
+        padding: 10px 20px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 1rem;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        transition: all 0.2s;
+    }
+
+    .ai-use-btn:hover {
+        background-color: var(--cream);
+        transform: scale(1.05);
+    }
+
+    .ai-close-btn {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        background: rgba(253, 250, 241, 0.2);
+        border: none;
+        color: var(--cream);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }
+
+    .ai-close-btn:hover {
+        background: rgba(253, 250, 241, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .ai-sidebar {
+            width: 100%;
+            right: -100%;
+        }
+        
+        .ai-toggle-btn {
+            right: 10px;
+            top: 100px;
+            padding: 12px 20px;
+            font-size: 0.8rem;
+        }
     }
 </style>
 
@@ -133,4 +385,172 @@
         </div>
     </div>
 </div>
+
+<!-- AI Toggle Button -->
+<button class="ai-toggle-btn" onclick="toggleAISidebar()">
+    <i class="fas fa-magic"></i> AI Assistant
+</button>
+
+<!-- AI Sidebar -->
+<div class="ai-sidebar" id="aiSidebar">
+    <div class="ai-sidebar-header">
+        <button class="ai-close-btn" onclick="toggleAISidebar()">×</button>
+        <h2>🤖 AI Recipe Creator</h2>
+        <p>Describe what you want to cook and I'll help you create a recipe!</p>
+    </div>
+    
+    <div class="ai-sidebar-content">
+        <label class="form-label" style="color: var(--pill-green);">Your Recipe Idea</label>
+        <textarea 
+            class="ai-prompt-input" 
+            id="aiPrompt" 
+            placeholder="E.g., 'A creamy tomato pasta with basil and garlic' or 'Quick chocolate chip cookies for 12 people'"
+        ></textarea>
+        
+        <button class="ai-generate-btn" onclick="generateRecipe()" id="aiGenerateBtn">
+            Generate Recipe
+        </button>
+        
+        <div class="ai-loading" id="aiLoading">
+            <div class="ai-loading-spinner"></div>
+            <p>Creating your recipe with AI...</p>
+        </div>
+        
+        <div class="ai-error" id="aiError"></div>
+        
+        <div class="ai-result" id="aiResult">
+            <h3>✨ Generated Recipe</h3>
+            <div class="ai-result-content" id="aiResultContent"></div>
+            <button class="ai-use-btn" onclick="useGeneratedRecipe()">Use This Recipe</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let generatedRecipeData = null;
+
+function toggleAISidebar() {
+    const sidebar = document.getElementById('aiSidebar');
+    sidebar.classList.toggle('active');
+}
+
+async function generateRecipe() {
+    const prompt = document.getElementById('aiPrompt').value.trim();
+    
+    if (!prompt) {
+        showError('Please describe what recipe you want to create!');
+        return;
+    }
+    
+    // Reset states
+    document.getElementById('aiResult').classList.remove('show');
+    document.getElementById('aiError').classList.remove('show');
+    document.getElementById('aiLoading').classList.add('show');
+    document.getElementById('aiGenerateBtn').disabled = true;
+    
+    try {
+        const response = await fetch('{{ url_for("recipes.ai_generate") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt: prompt })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to generate recipe');
+        }
+        
+        generatedRecipeData = data;
+        displayGeneratedRecipe(data);
+        
+    } catch (error) {
+        showError(error.message);
+    } finally {
+        document.getElementById('aiLoading').classList.remove('show');
+        document.getElementById('aiGenerateBtn').disabled = false;
+    }
+}
+
+function displayGeneratedRecipe(data) {
+    const content = document.getElementById('aiResultContent');
+    
+    let html = `
+        <div style="margin-bottom: 1rem;">
+            <strong style="display: block; margin-bottom: 0.5rem;">Title:</strong>
+            ${data.title}
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <strong style="display: block; margin-bottom: 0.5rem;">Description:</strong>
+            ${data.description}
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <strong>Servings:</strong> ${data.base_servings || 4} | 
+            <strong>Prep:</strong> ${data.prep_time_minutes || 0}min | 
+            <strong>Cook:</strong> ${data.cook_time_minutes || 0}min
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <strong style="display: block; margin-bottom: 0.5rem;">Ingredients (${data.ingredients.length}):</strong>
+            <ul style="margin: 0; padding-left: 1.5rem;">
+    `;
+    
+    data.ingredients.forEach(ing => {
+        html += `<li>${ing.quantity} ${ing.unit} ${ing.name}</li>`;
+    });
+    
+    html += `
+            </ul>
+        </div>
+        <div>
+            <strong style="display: block; margin-bottom: 0.5rem;">Steps (${data.instructions.length}):</strong>
+            <ol style="margin: 0; padding-left: 1.5rem;">
+    `;
+    
+    data.instructions.forEach(step => {
+        html += `<li style="margin-bottom: 0.5rem;">${step}</li>`;
+    });
+    
+    html += `
+            </ol>
+        </div>
+    `;
+    
+    content.innerHTML = html;
+    document.getElementById('aiResult').classList.add('show');
+}
+
+function useGeneratedRecipe() {
+    if (!generatedRecipeData) return;
+    
+    // Populate the form with generated data
+    document.getElementById('title').value = generatedRecipeData.title;
+    document.getElementById('description').value = generatedRecipeData.description;
+    document.getElementById('base_servings').value = generatedRecipeData.base_servings || 4;
+    document.getElementById('prep_time_minutes').value = generatedRecipeData.prep_time_minutes || 0;
+    document.getElementById('cook_time_minutes').value = generatedRecipeData.cook_time_minutes || 0;
+    
+    // Store ingredients and instructions in sessionStorage to use on next page
+    sessionStorage.setItem('ai_ingredients', JSON.stringify(generatedRecipeData.ingredients));
+    sessionStorage.setItem('ai_instructions', JSON.stringify(generatedRecipeData.instructions));
+    
+    // Close sidebar and scroll to form
+    toggleAISidebar();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Show success message
+    alert('Recipe details filled! Review and adjust as needed, then click "SAVE AND ADD INGREDIENTS" to continue.');
+}
+
+function showError(message) {
+    const errorDiv = document.getElementById('aiError');
+    errorDiv.textContent = message;
+    errorDiv.classList.add('show');
+    
+    setTimeout(() => {
+        errorDiv.classList.remove('show');
+    }, 5000);
+}
+</script>
 {% endblock %}

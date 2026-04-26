@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, g
+from flask import Blueprint, render_template, request, redirect, url_for, flash, g, jsonify
 from app.models import Recipe, Ingredient, Instruction, Review, Comment, ActivityLog, Unit, Allergen, Category, Tag
 from app.auth import login_required
+from app.ai_service import generate_recipe_from_prompt
 
 bp = Blueprint('recipes', __name__, url_prefix='/recipes')
 
@@ -295,3 +296,29 @@ def save(id):
         flash('Recipe saved successfully!')
     
     return redirect(url_for('recipes.view', id=id))
+
+
+@bp.route('/ai/generate', methods=('POST',))
+@login_required
+def ai_generate():
+    """Generate recipe from AI prompt."""
+    data = request.get_json()
+    
+    if not data or 'prompt' not in data:
+        return jsonify({'error': 'Prompt is required'}), 400
+    
+    prompt = data['prompt']
+    
+    if not prompt.strip():
+        return jsonify({'error': 'Prompt cannot be empty'}), 400
+    
+    try:
+        recipe_data = generate_recipe_from_prompt(prompt)
+        
+        if 'error' in recipe_data:
+            return jsonify({'error': recipe_data['error']}), 500
+        
+        return jsonify(recipe_data), 200
+        
+    except Exception as e:
+        return jsonify({'error': f'Failed to generate recipe: {str(e)}'}), 500

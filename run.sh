@@ -15,4 +15,4 @@ echo ""
 # Uncomment the line below if you want to check before initializing the db
 # if [ ! -f "instance/open_kitchen.db" ]; then
 
-flask run
+./venv/bin/flask run

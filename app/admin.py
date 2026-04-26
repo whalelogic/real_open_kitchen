@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from app.models import User, Unit, Allergen, ActivityLog, Report, Role
+from app.models import User, Unit, Allergen, ActivityLog, Report, Role, Recipe
 from app.auth import curator_required
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -10,6 +10,15 @@ bp = Blueprint('admin', __name__, url_prefix='/admin')
 def index():
     """Admin dashboard."""
     return render_template('admin/index.html')
+
+
+@bp.route('/recipes/<int:id>/delete', methods=('POST',))
+@curator_required
+def delete_recipe(id):
+    """Delete a recipe (Admin only)."""
+    Recipe.delete(id)
+    flash('Recipe deleted successfully.')
+    return redirect(url_for('recipes.index'))
 
 
 @bp.route('/users')
