@@ -54,11 +54,31 @@
 
 <div class="columns is-centered">
     <div class="column is-7-desktop is-9-tablet">
+
+
+		<div class="recipe-card" style="margin-bottom: 2rem; border-color: var(--pill-green); padding: 2rem;">
+            <h2 class="recipe-title" style="font-size: 1.5rem; margin-bottom: 0.5rem;">✨ Magic Paste</h2>
+            <p style="margin-bottom: 1rem; font-size: 0.9rem;">Paste a messy recipe from a website, email, or family text message. The AI will extract the details and fill out the form for you!</p>
+            
+            <textarea id="magic-paste-input" class="recipe-textarea" placeholder="Paste recipe text here..." style="min-height: 80px;"></textarea>
+            
+            <button type="button" id="magic-paste-btn" class="btn-pill" style="background-color: var(--border-dark); color: var(--cream);">
+                Auto-Fill Recipe
+            </button>
+            <p id="magic-paste-status" style="margin-top: 10px; font-weight: bold; color: var(--pill-green); display: none;">
+                ✨ Parsing... please wait.
+            </p>
+        </div>
+
+
+    
         <div class="recipe-card">
             <h1 class="recipe-title has-text-centered">Create New Recipe</h1>
             
             <form method="post">
-            <div class="field">
+            	<input type="hidden" name="ai_ingredients" id="ai_ingredients">
+                <input type="hidden" name="ai_instructions" id="ai_instructions">
+             <div class="field">
                 <label class="form-label" for="template_type">Template Type</label>
                 <select class="recipe-input" name="template_type" id="template_type" required>
                     <option value="">-- Select Template --</option>
@@ -133,4 +153,93 @@
         </div>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('magic-paste-btn').addEventListener('click', async () => {
+        const text = document.getElementById('magic-paste-input').value;
+        const statusText = document.getElementById('magic-paste-status');
+        
+        if (!text) {
+            alert('Please paste some text first!');
+            return;
+        }
+
+        // Show loading status
+        statusText.style.display = 'block';
+        statusText.innerText = '✨ AI is reading your recipe...';
+        statusText.style.color = 'var(--pill-green)';
+
+        try {
+            const response = await fetch("{{ url_for('recipes.parse_recipe') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: text })
+            });
+
+            const data = await response.json();
+
+            if (data.error) throw new Error(data.error);
+
+            // Auto-fill the existing form fields
+            if (data.title) document.getElementById('title').value = data.title;
+            if (data.description) document.getElementById('description').value = data.description;
+            if (data.base_servings) document.getElementById('base_servings').value = data.base_servings;
+            if (data.prep_time_minutes) document.getElementById('prep_time_minutes').value = data.prep_time_minutes;
+            if (data.cook_time_minutes) document.getElementById('cook_time_minutes').value = data.cook_time_minutes;
+
+			// Auto-check Categories
+            if (data.categories && data.categories.length > 0) {
+                document.querySelectorAll('input[name="categories"]').forEach(cb => {
+                    const labelText = cb.parentElement.textContent.trim();
+                    if (data.categories.includes(labelText)) {
+                        cb.checked = true;
+                    }
+                });
+            }
+
+            // Auto-check Tags
+            if (data.tags && data.tags.length > 0) {
+                document.querySelectorAll('input[name="tags"]').forEach(cb => {
+                    const labelText = cb.parentElement.textContent.trim();
+                    if (data.tags.includes(labelText)) {
+                        cb.checked = true;
+                    }
+                });
+            }
+
+            // Save ingredients and instructions to hidden fields for the backend
+            if (data.ingredients) {
+                document.getElementById('ai_ingredients').value = JSON.stringify(data.ingredients);
+            }
+            if (data.instructions) {
+                document.getElementById('ai_instructions').value = JSON.stringify(data.instructions);
+            }
+
+
+            // NEW: Save the complex arrays into the hidden fields as JSON strings
+			 if (data.ingredients && data.ingredients.length > 0) {
+                 document.getElementById('ai_ingredients').value = JSON.stringify(data.ingredients);
+             }
+             if (data.instructions && data.instructions.length > 0) {
+                 document.getElementById('ai_instructions').value = JSON.stringify(data.instructions);
+             }    
+            
+            // Set template type automatically to standard if empty
+            const templateSelect = document.getElementById('template_type');
+            if (templateSelect.value === "") templateSelect.value = "standard";
+
+            // Success feedback
+            statusText.innerText = '✅ Success! Review the details below.';
+            setTimeout(() => { statusText.style.display = 'none'; }, 5000);
+
+        } catch (error) {
+            console.error('Error parsing recipe:', error);
+            statusText.innerText = '❌ Oops, we could not parse that text.';
+            statusText.style.color = '#ff3860';
+        }
+    });
+});
+</script>
 {% endblock %}
