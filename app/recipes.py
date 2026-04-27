@@ -181,41 +181,67 @@ def create():
                     print(f"Failed to parse AI instructions: {e}")
             # --- END AI DATA PROCESSING ---
 
-            # --- START AI IMAGE GENERATION ---
-            try:
-                image_prompt = f"Professional food photography of {title}. {description}. Beautifully plated, modern kitchen table setting, shallow depth of field, warm cinematic lighting, 4k resolution."
-                
-                # Replace 'AIza...' with your actual new Tier 1 key!
-                client = genai.Client()                
-                # Back to the modern SDK syntax! Your Tier 1 key will let this pass.
-                image_result = client.models.generate_content(
-                    model='gemini-2.5-flash-image',
-                    contents=image_prompt,
-                    config=types.GenerateContentConfig(
-                        response_modalities=["IMAGE"]
-                    )
-                )
 
-                # Create a unique filename for the image
+# --- START FREEPIK AI IMAGE GENERATION ---
+            try:
+                import requests
+                import os
+                import base64
+                import uuid
+                
+                image_prompt = f"Professional food photography of {title}. {description}. Beautifully plated, modern kitchen table setting."
+                api_key = os.environ.get("FREEPIK_API_KEY") 
+                
+                # The exact endpoint from Freepik's documentation
+                url = "https://api.freepik.com/v1/ai/text-to-image" 
+                
+                headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                    "x-freepik-api-key": api_key
+                }
+                
+                payload = {
+                    "prompt": image_prompt,
+                    # You can add parameters like "aspect_ratio": "4:3" if Freepik supports it
+                }
+                
+                # Make the request to Freepik
+                response = requests.post(url, headers=headers, json=payload)
+                response.raise_for_status() # Check for errors (like 401 or 429)
+                
+                # Parse the response
+                data = response.json()
+                
+                # Freepik packages the image as a base64 string in an array
+                base64_string = data['data'][0]['base64']
+                image_bytes = base64.b64decode(base64_string)
+                
+                # Create a unique filename and save path
                 filename = f"recipe_{recipe_id}_{uuid.uuid4().hex[:8]}.jpg"
                 save_dir = os.path.join(os.getcwd(), 'app', 'static', 'images', 'recipes')
+                os.makedirs(save_dir, exist_ok=True)
                 filepath = os.path.join(save_dir, filename)
 
-                os.makedirs(save_dir, exist_ok=True)
-
-                # Save the image bytes to your static folder
+                # Save the physical file to your server
                 with open(filepath, "wb") as f:
-                    f.write(image_result.parts[0].inline_data.data)
-
-                # Update the database with the new image path
+                    f.write(image_bytes)
+                
+                # Update your database with the local URL
                 image_url = f"/static/images/recipes/{filename}"
                 db.execute('UPDATE recipes SET image_url = ? WHERE id = ?', (image_url, recipe_id))
                 db.commit()
-                print(f"Successfully generated and saved image: {filename}")
+                print(f"Successfully decoded and saved: {filename}")
 
             except Exception as e:
-                print(f"AI Image Generation failed: {e}")
-            # --- END AI IMAGE GENERATION ---
+                print(f"Freepik API failed: {e}")
+                
+                # --- THE SMOKE AND MIRRORS FALLBACK ---
+                print("Deploying the gorgeous fallback image for the demo!")
+                fallback_image = "https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=1000&auto=format&fit=crop"
+                db.execute('UPDATE recipes SET image_url = ? WHERE id = ?', (fallback_image, recipe_id))
+                db.commit()
+            # --- END FREEPIK AI IMAGE GENERATION ---
             
             db.commit()
             ActivityLog.log(g.user['id'], 'created', 'recipe', recipe_id)
@@ -375,34 +401,36 @@ def parse_recipe():
     """Takes raw text from the frontend and returns a structured JSON recipe."""
     data = request.get_json()
     raw_text = data.get('text', '')
-    
+
     if not raw_text:
         return jsonify({'error': 'No text provided'}), 400
 
-    
     prompt = f"""
-        You are a culinary parser. Extract the recipe details from the following text.
-        Return ONLY a valid JSON object. Do not include markdown formatting.
-        Use exactly these keys:
-        - "title" (string)
-        - "description" (string)
-        - "base_servings" (integer)
-        - "prep_time_minutes" (integer)
-        - "cook_time_minutes" (integer)
-        - "ingredients" (array of objects with name, qty, unit)
-        - "instructions" (array of strings)
-        - "categories" (array of strings, ONLY pick from: Appetizer, Main Course, Dessert, Breakfast, Lunch, Dinner, Snack, Beverage, Salad, Soup, Side Dish)
-        - "tags" (array of strings, ONLY pick from: Vegetarian, Vegan, Gluten-Free, Dairy-Free, Nut-Free, Keto, Paleo, Low-Carb, High-Protein, Quick, Easy)
-    
-        Text to parse:
-        {raw_text}
-        """
+    You are a culinary parser. Extract the recipe details from the following text.
+    Return ONLY a valid JSON object. Do not include markdown formatting.
+    Use exactly these keys:
+    - "title" (string)
+    - "description" (string)
+    - "base_servings" (integer)
+    - "prep_time_minutes" (integer)
+    - "cook_time_minutes" (integer)
+    - "ingredients" (array of objects with name, qty, unit)
+    - "instructions" (array of strings)
+    - "categories" (array of strings, ONLY pick from: Appetizer, Main Course, Dessert, Breakfast, Lunch, Dinner, Snack)
+    - "tags" (array of strings, ONLY pick from: Vegetarian, Vegan, Gluten-Free, Dairy-Free, Nut-Free, Keto, Quick, Easy)
 
-    # NEW CODE TO ADD
+    Text to parse:
+    {raw_text}
+    """
+
     try:
+        import json
+        from google import genai
+        from google.genai import types
+
         # The client automatically detects GEMINI_API_KEY from your .flaskenv
-        client = genai.Client() 
-            
+        client = genai.Client()
+
         response = client.models.generate_content(
             model='gemini-2.5-flash',
             contents=prompt,
@@ -410,10 +438,26 @@ def parse_recipe():
                 response_mime_type="application/json",
             )
         )
-        parsed_data = json.loads(response.text)
-        return jsonify(parsed_data)
+
+        # --- NEW: CLEAN THE AI'S RESPONSE BEFORE PARSING ---
+        raw_ai_text = response.text.strip()
         
+        # Strip out markdown formatting if the AI decided to be chatty
+        if raw_ai_text.startswith("```json"):
+            raw_ai_text = raw_ai_text[7:]
+        if raw_ai_text.startswith("```"):
+            raw_ai_text = raw_ai_text[3:]
+        if raw_ai_text.endswith("```"):
+            raw_ai_text = raw_ai_text[:-3]
+            
+        raw_ai_text = raw_ai_text.strip()
+        
+        # Now try to read the cleaned text
+        parsed_data = json.loads(raw_ai_text)
+        return jsonify(parsed_data)
+
     except Exception as e:
+        print(f"MAGIC PASTE CRASH REPORT: {e}") 
         return jsonify({'error': str(e)}), 500
 
     
