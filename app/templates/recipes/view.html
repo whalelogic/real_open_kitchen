@@ -60,20 +60,35 @@
 
     {% if g.user %}
     <div class="action-row">
-        <form method="post" action="{{ url_for('recipes.save', id=recipe.id) }}" class="action-form">
+        <form method="post" action="{{ url_for('recipes.save', id=recipe.id) }}" class="action-form" {% if is_saved %}onsubmit="return confirm('Remove this recipe from your saved list?');"{% endif %}>
             <button type="submit" class="btn-pill">
-                {% if is_saved %}Unsave Recipe{% else %}Save Recipe{% endif %}
+                {% if is_saved %}Remove from Saved{% else %}Save Recipe{% endif %}
             </button>
         </form>
-        <form method="post" action="{{ url_for('recipes.fork', id=recipe.id) }}" class="action-form">
-            <button type="submit" class="btn-pill is-white">
-                Fork Recipe
-            </button>
-        </form>
+        {% if g.user['id'] != recipe.author_id %}
+            <form method="post" action="{{ url_for('recipes.fork', id=recipe.id) }}" class="action-form">
+                <button type="submit" class="btn-pill is-white">
+                    Fork Recipe
+                </button>
+            </form>
+        {% endif %}
         {% if g.user['id'] == recipe.author_id %}
         <a href="{{ url_for('recipes.edit_ingredients', id=recipe.id) }}" class="btn-pill" style="text-decoration: none;">
             Edit Recipe
         </a>
+        {% if recipe.parent_recipe_id %}
+        <form method="post" action="{{ url_for('recipes.delete', id=recipe.id) }}" class="action-form" onsubmit="return confirm('Delete this fork? The original recipe will not be affected. This cannot be undone.');">
+            <button type="submit" class="btn-pill" style="background-color: #ff3b30; color: white; border-color: var(--border-dark);">
+                Delete Fork
+            </button>
+        </form>
+        {% else %}
+        <form method="post" action="{{ url_for('recipes.delete', id=recipe.id) }}" class="action-form" onsubmit="return confirm('Delete this recipe? Existing forks will remain, but saved entries for this recipe will be removed. This cannot be undone.');">
+            <button type="submit" class="btn-pill" style="background-color: #ff3b30; color: white; border-color: var(--border-dark);">
+                Delete Recipe
+            </button>
+        </form>
+        {% endif %}
         {% endif %}
     </div>
     {% endif %}
