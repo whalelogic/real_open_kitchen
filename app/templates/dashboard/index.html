@@ -73,10 +73,18 @@
         letter-spacing: 1px;
         cursor: pointer;
         color: var(--border-dark);
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
     }
 
     .mini-action:hover {
         background-color: var(--pill-green);
+    }
+
+    .recipe-strip form,
+    .recipe-grid-card form {
+        margin: 0;
     }
 </style>
 
@@ -140,9 +148,12 @@
                             {% if recipe.avg_rating %}<span class="meta-label">Rating: {{ "%.1f"|format(recipe.avg_rating) }}</span>{% endif %}
                             <span class="meta-label">{{ recipe.review_count }} Reviews</span>
                         </div>
-                        <div style="display: flex; gap: 10px; margin-top: auto;">
+                        <div style="display: flex; gap: 10px; margin-top: auto; align-items: center; flex-wrap: wrap;">
                             <a href="{{ url_for('recipes.view', id=recipe.id) }}" class="meta-label" style="text-decoration: underline;">View</a>
                             <a href="{{ url_for('recipes.edit_ingredients', id=recipe.id) }}" class="meta-label" style="text-decoration: underline;">Edit</a>
+                            <form method="post" action="{{ url_for('recipes.delete', id=recipe.id) }}" onsubmit="return confirm('Delete this recipe? Existing forks will remain, but saved entries for this recipe will be removed. This cannot be undone.');">
+                                <button type="submit" class="mini-action">Delete Recipe</button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -162,7 +173,19 @@
                 <div class="recipe-strip">
                     <div>
                         <a href="{{ url_for('recipes.view', id=recipe.id) }}" style="font-weight: bold; color: var(--border-dark); text-decoration: none;">{{ recipe.title|upper }}</a>
-                        <p class="meta-label" style="margin-top: 5px;">From: {{ recipe.parent_title }}</p>
+                        <p class="meta-label" style="margin-top: 5px;">
+                            {% if recipe.parent_title %}
+                            From: {{ recipe.parent_title }}
+                            {% else %}
+                            Original recipe no longer available
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+                        <a href="{{ url_for('recipes.edit_ingredients', id=recipe.id) }}" class="mini-action">Edit</a>
+                        <form method="post" action="{{ url_for('recipes.delete', id=recipe.id) }}" onsubmit="return confirm('Delete this fork? The original recipe will not be affected. This cannot be undone.');">
+                            <button type="submit" class="mini-action">Delete Fork</button>
+                        </form>
                     </div>
                 </div>
                 {% endfor %}
@@ -182,6 +205,9 @@
                         <a href="{{ url_for('recipes.view', id=recipe.id) }}" style="font-weight: bold; color: var(--border-dark); text-decoration: none;">{{ recipe.title|upper }}</a>
                         <p class="meta-label" style="margin-top: 5px;">By {{ recipe.author_name }} | Saved: {{ recipe.saved_at }}</p>
                     </div>
+                    <form method="post" action="{{ url_for('recipes.save', id=recipe.id) }}" onsubmit="return confirm('Remove this recipe from your saved list?');">
+                        <button type="submit" class="mini-action">Remove from Saved</button>
+                    </form>
                 </div>
                 {% endfor %}
             {% else %}

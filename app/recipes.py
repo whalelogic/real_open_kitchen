@@ -90,7 +90,7 @@ def create():
     if request.method == 'POST':
         title = request.form['title']
         description = request.form.get('description')
-        template_type = request.form['template_type']
+        template_type = 'standard'
         base_servings = request.form.get('base_servings', type=int)
         prep_time = request.form.get('prep_time_minutes', type=int)
         cook_time = request.form.get('cook_time_minutes', type=int)
@@ -100,8 +100,6 @@ def create():
         error = None
         if not title:
             error = 'Title is required.'
-        elif template_type not in ['standard', 'quick_tip']:
-            error = 'Invalid template type.'
         
         if error is None:
             recipe_id = Recipe.create(
@@ -266,6 +264,15 @@ def delete_instruction(id):
 @login_required
 def fork(id):
     """Fork an existing recipe."""
+    recipe = Recipe.get_by_id(id)
+    if recipe is None:
+        flash('Recipe not found.')
+        return redirect(url_for('recipes.index'))
+
+    if recipe['author_id'] == g.user['id']:
+        flash('You cannot fork your own recipe.')
+        return redirect(url_for('recipes.view', id=id))
+
     new_recipe_id = Recipe.fork(id, g.user['id'], g.user['username'])
     
     if new_recipe_id is None:
@@ -274,6 +281,32 @@ def fork(id):
     
     flash('Recipe forked successfully!')
     return redirect(url_for('recipes.view', id=new_recipe_id))
+
+
+@bp.route('/<int:id>/delete', methods=('POST',))
+@login_required
+def delete(id):
+    """Delete a recipe owned by the current user."""
+    recipe = Recipe.get_by_id(id)
+
+    if recipe is None:
+        flash('Recipe not found.')
+        return redirect(url_for('dashboard.index'))
+
+    if recipe['author_id'] != g.user['id']:
+        flash('You can only delete recipes you created.')
+        return redirect(url_for('recipes.view', id=id))
+
+    is_fork = recipe['parent_recipe_id'] is not None
+    if Recipe.delete(id, notify_saved_users=True):
+        if is_fork:
+            flash('Fork deleted. The original recipe was not affected.')
+        else:
+            flash('Recipe deleted. Existing forks remain available.')
+    else:
+        flash('Recipe could not be deleted.')
+
+    return redirect(url_for('dashboard.index'))
 
 
 @bp.route('/<int:id>/save', methods=('POST',))

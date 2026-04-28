@@ -71,14 +71,14 @@ class Recipe:
     
     @staticmethod
     def get_by_author(author_id):
-        """Get all recipes by an author."""
+        """Get all original recipes by an author."""
         db = get_db()
         return db.execute(
             'SELECT r.*, COUNT(DISTINCT rv.id) as review_count, '
             'AVG(rv.rating) as avg_rating '
             'FROM recipes r '
             'LEFT JOIN reviews rv ON r.id = rv.recipe_id '
-            'WHERE r.author_id = ? '
+            'WHERE r.author_id = ? AND r.parent_recipe_id IS NULL '
             'GROUP BY r.id ORDER BY r.created_at DESC',
             (author_id,)
         ).fetchall()
@@ -167,6 +167,41 @@ class Recipe:
             'ORDER BY r.created_at DESC LIMIT ?',
             (limit,)
         ).fetchall()
+
+    @staticmethod
+    def delete(recipe_id, notify_saved_users=False):
+        """Delete a recipe while preserving forks that were copied from it."""
+        db = get_db()
+        recipe = Recipe.get_by_id(recipe_id)
+        if recipe is None:
+            return False
+
+        if notify_saved_users:
+            saved_users = db.execute(
+                'SELECT user_id FROM saved_recipes '
+                'WHERE recipe_id = ? AND user_id != ?',
+                (recipe_id, recipe['author_id'])
+            ).fetchall()
+
+            for user in saved_users:
+                db.execute(
+                    'INSERT INTO notifications (user_id, type, reference_id, message) '
+                    'VALUES (?, ?, ?, ?)',
+                    (
+                        user['user_id'],
+                        'saved_recipe_deleted',
+                        None,
+                        f"A recipe you saved, \"{recipe['title']}\", was deleted by its author."
+                    )
+                )
+
+        db.execute(
+            'UPDATE recipes SET parent_recipe_id = NULL WHERE parent_recipe_id = ?',
+            (recipe_id,)
+        )
+        db.execute('DELETE FROM recipes WHERE id = ?', (recipe_id,))
+        db.commit()
+        return True
     
     @staticmethod
     def get_stats():
