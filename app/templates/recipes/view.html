@@ -15,7 +15,7 @@
 
 <div class="recipe-main-card">
     <h1 style="font-family: 'Georgia', serif; text-transform: uppercase; font-size: 2.5rem;">{{ recipe.title }}</h1>
-    <p>By {{ recipe.author_name|upper }} | {{ recipe.template_type|replace('_', ' ')|upper }}</p>
+    <p>By {{ recipe.author_name|upper }}</p>
 
     {% if recipe.description %}
     <p style="margin-top: 1rem; line-height: 1.6;">{{ recipe.description }}</p>

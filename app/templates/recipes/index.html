@@ -29,35 +29,53 @@
         margin-top: 2rem;
     }
 
-    .recipe-entry {
-        margin-bottom: 2.5rem;
+    .recipe-result-card {
+        background-color: var(--cream);
+        border: 2px solid var(--border-dark);
+        border-radius: 18px;
+        box-shadow: 5px 5px 0 var(--border-dark);
+        color: var(--border-dark);
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+        padding: 1.5rem;
+        transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .recipe-entry a {
-        color: var(--pill-green) !important;
+    .recipe-result-card:hover {
+        box-shadow: 7px 7px 0 var(--border-dark);
+        transform: translate(-2px, -2px);
+    }
+
+    .recipe-result-title {
+        color: var(--border-dark) !important;
         font-family: 'Georgia', serif;
-        font-size: 1.2rem;
+        font-size: 1.25rem;
         font-weight: bold;
+        line-height: 1.2;
         text-decoration: none;
+        text-transform: uppercase;
     }
 
-    .recipe-entry a:hover {
-        color: var(--cream) !important;
+    .recipe-result-title:hover {
+        color: var(--forest-green) !important;
+        text-decoration: underline;
     }
 
     .author-tag {
+        color: var(--forest-green);
         text-transform: uppercase;
         font-size: 0.75rem;
         letter-spacing: 1px;
-        opacity: 0.8;
         display: block;
-        margin-top: 0.5rem;
+        font-weight: bold;
+        margin-top: auto;
     }
 
     .recipe-description {
         font-size: 0.9rem;
         line-height: 1.4;
-        margin: 0.5rem 0;
+        margin: 0.75rem 0 1rem;
     }
 
     .filter-card {
@@ -88,10 +106,11 @@
 
     .result-pill {
         display: inline-block;
-        border: 2px solid var(--pill-green);
+        background-color: var(--cream);
+        border: 2px solid var(--border-dark);
         border-radius: 20px;
         padding: 5px 14px;
-        color: var(--cream);
+        color: var(--border-dark);
         font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 1px;
@@ -163,11 +182,13 @@
     <div class="columns is-multiline">
         {% for recipe in recipes %}
         <div class="column is-4 recipe-entry">
-            <a href="{{ url_for('recipes.view', id=recipe.id) }}">
-                {{ recipe.title }}
-            </a>
-            <p class="recipe-description">{{ recipe.description[:100] if recipe.description else '' }}{% if recipe.description and recipe.description|length > 100 %}...{% endif %}</p>
-            <span class="author-tag">By {{ recipe.author_name }}</span>
+            <div class="recipe-result-card">
+                <a class="recipe-result-title" href="{{ url_for('recipes.view', id=recipe.id) }}">
+                    {{ recipe.title }}
+                </a>
+                <p class="recipe-description">{{ recipe.description[:120] if recipe.description else 'No description yet.' }}{% if recipe.description and recipe.description|length > 120 %}...{% endif %}</p>
+                <span class="author-tag">By {{ recipe.author_name }}</span>
+            </div>
         </div>
         {% else %}
         <div class="column is-12">

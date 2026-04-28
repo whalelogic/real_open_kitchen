@@ -114,6 +114,12 @@
             border-radius: 15px;
             color: var(--border-dark);
             font-weight: bold;
+            transition: opacity 0.3s ease, transform 0.3s ease, margin 0.3s ease, padding 0.3s ease;
+        }
+
+        .notification.is-custom.is-hiding {
+            opacity: 0;
+            transform: translateY(-8px);
         }
 
         /* User Menu Dropdown styling */
@@ -223,11 +229,24 @@
     <script>
         // Bulma Delete button logic
         document.addEventListener('DOMContentLoaded', () => {
-            (document.querySelectorAll('.notification .delete') || []).forEach(($delete) => {
-                const $notification = $delete.parentNode;
-                $delete.addEventListener('click', () => {
-                    $notification.parentNode.removeChild($notification);
-                });
+            const dismissNotification = ($notification) => {
+                if (!$notification || $notification.classList.contains('is-hiding')) return;
+                $notification.classList.add('is-hiding');
+                setTimeout(() => {
+                    if ($notification.parentNode) {
+                        $notification.parentNode.removeChild($notification);
+                    }
+                }, 300);
+            };
+
+            (document.querySelectorAll('.notification.is-custom') || []).forEach(($notification) => {
+                const $delete = $notification.querySelector('.delete');
+
+                if ($delete) {
+                    $delete.addEventListener('click', () => dismissNotification($notification));
+                }
+
+                setTimeout(() => dismissNotification($notification), 15000);
             });
         });
     </script>

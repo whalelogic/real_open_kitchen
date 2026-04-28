@@ -90,7 +90,7 @@ def create():
     if request.method == 'POST':
         title = request.form['title']
         description = request.form.get('description')
-        template_type = request.form['template_type']
+        template_type = 'standard'
         base_servings = request.form.get('base_servings', type=int)
         prep_time = request.form.get('prep_time_minutes', type=int)
         cook_time = request.form.get('cook_time_minutes', type=int)
@@ -100,8 +100,6 @@ def create():
         error = None
         if not title:
             error = 'Title is required.'
-        elif template_type not in ['standard', 'quick_tip']:
-            error = 'Invalid template type.'
         
         if error is None:
             recipe_id = Recipe.create(
