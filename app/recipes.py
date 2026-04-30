@@ -328,3 +328,56 @@ def save(id):
         flash('Recipe saved successfully!')
     
     return redirect(url_for('recipes.view', id=id))
+
+
+
+
+# Review and comment routes are in social.py since they are more about user interaction than recipe management.
+@bp.route('/<int:id>/review', methods=('POST',))
+@login_required
+def add_review(id):
+    """Add or update a review for a recipe."""
+    from app.models.social import Review
+    
+    recipe = Recipe.get_by_id(id)
+    
+    if recipe is None:
+        flash('Recipe not found.')
+        return redirect(url_for('recipes.index'))
+    
+    rating = request.form.get('rating', type=int)
+    comment = request.form.get('comment', '').strip()
+    
+    if rating is None or rating < 1 or rating > 5:
+        flash('Please select a star rating.')
+        return redirect(url_for('recipes.view', id=id))
+    
+    if not comment:
+        flash('Please write a review along with your rating.')
+        return redirect(url_for('recipes.view', id=id))
+    
+    Review.create(id, g.user['id'], rating, comment)
+    flash('Review submitted successfully!')
+    return redirect(url_for('recipes.view', id=id))
+
+
+@bp.route('/<int:id>/comment', methods=('POST',))
+@login_required
+def add_comment(id):
+    """Add a comment to a recipe."""
+    from app.models.social import Comment
+    
+    recipe = Recipe.get_by_id(id)
+    if recipe is None:
+        flash('Recipe not found.')
+        return redirect(url_for('recipes.index'))
+    
+    content = request.form.get('content')
+    
+    if not content:
+        flash('Comment cannot be empty.')
+        return redirect(url_for('recipes.view', id=id))
+    
+    Comment.create(id, g.user['id'], content)
+    flash('Comment added successfully!')
+    return redirect(url_for('recipes.view', id=id))

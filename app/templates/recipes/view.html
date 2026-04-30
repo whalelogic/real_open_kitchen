@@ -11,6 +11,15 @@
     .subtle-meta { text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; font-weight: bold; opacity: 0.7; }
     .action-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.5rem; }
     .action-form { margin: 0; }
+
+    
+    .star-input { display: inline-flex; flex-direction: row-reverse; font-size: 1.5rem;}
+    .star-input input[type="radio"] { display: none; }
+    .star-input label { cursor: pointer; color: #ccc; }
+    .star-input input[type="radio"]:checked ~ label,
+    .star-input label:hover,
+    .star-input label:hover ~ label { color: #f5a623;}
+
 </style>
 
 <div class="recipe-main-card">
@@ -126,43 +135,100 @@
     </div>
 </div>
 
-<div class="columns">
-    <div class="column is-6">
-        <div class="recipe-main-card">
-            <h2 class="section-title">Reviews</h2>
-            {% for review in reviews %}
-            <div class="social-card">
-                <div style="display: flex; justify-content: space-between; gap: 12px; align-items: center;">
-                    <strong>{{ review.username }}</strong>
-                    <span class="meta-pill" style="margin: 0;">{{ review.rating }}/5</span>
-                </div>
-                {% if review.comment %}
-                <p style="margin-top: 0.75rem; line-height: 1.6;">{{ review.comment }}</p>
-                {% endif %}
-                <p class="subtle-meta" style="margin-top: 0.75rem;">{{ review.created_at }}</p>
-            </div>
-            {% else %}
-            <p>No reviews yet.</p>
-            {% endfor %}
-        </div>
-    </div>
 
-    <div class="column is-6">
-        <div class="recipe-main-card">
-            <h2 class="section-title">Comments</h2>
-            {% for comment in comments %}
-            <div class="social-card">
-                <div style="display: flex; justify-content: space-between; gap: 12px; align-items: center;">
-                    <strong>{{ comment.username }}</strong>
-                    <span class="subtle-meta">{{ comment.created_at }}</span>
-                </div>
-                <p style="margin-top: 0.75rem; line-height: 1.6;">{{ comment.content }}</p>
-            </div>
-            {% else %}
-            <p>No comments yet.</p>
-            {% endfor %}
+
+<!--  Reviews and Comments are in their own section below the main recipe details, to keep the 
+ focus on the recipe itself while still showcasing social interactions for those who want to engage with them.
+-->
+ 
+<!-- REVIEW HTML -->
+<div class="recipe-main-card">
+    <h2 class="section-title">Reviews</h2>
+
+    {# Average rating summary #}
+    {% if reviews %}
+        {% set total = reviews|sum(attribute='rating') %}
+        {% set avg = (total / reviews|length) | round(1) %}
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem;">
+            <span style="font-size: 1.5rem; color: #f5a623;">
+                {% for i in range(1, 6) %}{% if i <= avg|round(0, 'common')|int %}★{% else %}☆{% endif %}{% endfor %}
+            </span>
+            <span style="font-weight: bold;">{{ avg }} / 5</span>
+            <span class="subtle-meta">({{ reviews|length }} review{{ 's' if reviews|length != 1 else '' }})</span>
         </div>
+    {% endif %}
+
+    {# Existing reviews #}
+    {% for review in reviews %}
+    <div class="social-card">
+        <div style="display: flex; justify-content: space-between; gap: 12px; align-items: center;">
+            <strong>{{ review.username }}</strong>
+            <span style="color: #f5a623; font-size: 1.1rem;">
+                {% for i in range(1, 6) %}{% if i <= review.rating %}★{% else %}☆{% endif %}{% endfor %}
+            </span>
+        </div>
+        <p style="margin-top: 0.75rem; line-height: 1.6;">{{ review.comment }}</p>
+        <p class="subtle-meta" style="margin-top: 0.75rem;">{{ review.created_at }}</p>
     </div>
+    {% else %}
+    <p>No reviews yet. Be the first!</p>
+    {% endfor %}
+
+    {# Review form #}
+    {% if g.user and g.user.id != recipe.author_id %}
+    <form method="post" action="{{ url_for('recipes.add_review', id=recipe.id) }}" class="review-form" style="margin-top: 1.5rem;">
+        <h3 style="margin-bottom: 0.5rem;">Leave a Review</h3>
+
+        <div style="margin-bottom: 1rem;">
+            <p class="subtle-meta" style="margin-bottom: 0.25rem;">Your Rating</p>
+            <div class="star-input">
+                <input type="radio" name="rating" id="star5" value="5" required><label for="star5">★</label>
+                <input type="radio" name="rating" id="star4" value="4"><label for="star4">★</label>
+                <input type="radio" name="rating" id="star3" value="3"><label for="star3">★</label>
+                <input type="radio" name="rating" id="star2" value="2"><label for="star2">★</label>
+                <input type="radio" name="rating" id="star1" value="1"><label for="star1">★</label>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label for="review-comment" class="subtle-meta" style="display: block; margin-bottom: 0.25rem;">Your Review</label>
+            <textarea name="comment" id="review-comment" rows="3" required placeholder="Tell us what you thought..." style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-dark); border-radius: 15px; font-family: inherit;"></textarea>
+        </div>
+
+        <button type="submit" class="btn-pill">Post Review</button>
+    </form>
+    {% elif not g.user %}
+    <p style="margin-top: 1rem;"><a href="{{ url_for('auth.login') }}">Log in</a> to leave a review.</p>
+    {% endif %}
+</div>
+
+
+<!-- COMMENT HTML -->
+  <div class="recipe-main-card">
+    <h2 class="section-title">Comments</h2>
+
+    {% for comment in comments %}
+    <div class="social-card">
+        <div style="display: flex; justify-content: space-between; gap: 12px; align-items: center;">
+            <strong>{{ comment.username }}</strong>
+            <span class="subtle-meta">{{ comment.created_at }}</span>
+        </div>
+        <p style="margin-top: 0.75rem; line-height: 1.6;">{{ comment.content }}</p>
+    </div>
+    {% else %}
+    <p>No comments yet. Start the conversation!</p>
+    {% endfor %}
+
+    {# Comment form #}
+    {% if g.user %}
+    <form method="post" action="{{ url_for('recipes.add_comment', id=recipe.id) }}" class="comment-form" style="margin-top: 1.5rem;">
+        <label for="comment-content" class="subtle-meta" style="display: block; margin-bottom: 0.25rem;">Add a Comment</label>
+        <textarea name="content" id="comment-content" rows="2" required placeholder="Share a tip, ask a question..." style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-dark); border-radius: 15px; font-family: inherit; margin-bottom: 0.75rem;"></textarea>
+        <button type="submit" class="btn-pill">Post Comment</button>
+    </form>
+    {% else %}
+    <p style="margin-top: 1rem;"><a href="{{ url_for('auth.login') }}">Log in</a> to comment.</p>
+    {% endif %}
 </div>
 
 <script>
