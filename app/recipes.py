@@ -188,8 +188,30 @@ def create():
                 import os
                 import base64
                 import uuid
+                from google import genai
+
+                client = genai.client()
+                safety_prompt = f"Is the following title a food dish, beverage, or recipe? Reply with ONLY the word YES or NO. Title: '{title}'"
                 
-                image_prompt = f"Professional food photography of {title}. {description}. Beautifully plated, modern kitchen table setting."
+                safety_response = client.models.generate_content(
+                    model='gemini-2.5-flash',
+                    contents=safety_prompt
+                )
+
+                is_food = safety_response.text.strip().upper()
+                
+                if "YES" not in is_food:
+                    print(f"Safeguard triggered: '{title}' is not a valid food item.")
+                    raise ValueError("Title is not food-related.") # This intentionally crashes the try block!
+                    
+                image_prompt = (
+                    f"Ultra-realistic, 8k professional food photography of exactly this dish: {title}. "
+                    f"Context: {description}. "
+                    f"CRITICAL RESTRICTION: You must strictly depict ONLY the ingredients implied by the title and description. "
+                    f"Do absolutely NOT add random garnishes, extra vegetables, side salads, or drinks that are not part of the dish. "
+                    f"Style: Photorealistic, macro food lens, natural window lighting, highly detailed."
+                )
+                
                 api_key = os.environ.get("FREEPIK_API_KEY") 
                 
                 # The exact endpoint from Freepik's documentation
@@ -406,8 +428,12 @@ def parse_recipe():
         return jsonify({'error': 'No text provided'}), 400
 
     prompt = f"""
-    You are a culinary parser. Extract the recipe details from the following text.
-    Return ONLY a valid JSON object. Do not include markdown formatting.
+    You are a strict culinary parser. 
+    
+    STEP 1: Evaluate the text. If the text is clearly NOT a recipe or food instructions (e.g., it is a conversation, a joke, an essay, or random gibberish), return EXACTLY this JSON and nothing else:
+    {{"error": "NOT_A_RECIPE"}}
+
+    STEP 2: If it IS a recipe, extract the details and return ONLY a valid JSON object. Do not include markdown formatting.
     Use exactly these keys:
     - "title" (string)
     - "description" (string)
@@ -454,6 +480,9 @@ def parse_recipe():
         
         # Now try to read the cleaned text
         parsed_data = json.loads(raw_ai_text)
+        # --- NEW SAFEGUARD CHECK ---
+        if parsed_data.get("error") == "NOT_A_RECIPE":
+            return jsonify({'error': 'Please paste a valid recipe.'}), 400
         return jsonify(parsed_data)
 
     except Exception as e:
@@ -482,35 +511,3 @@ def save(id):
         flash('Recipe saved successfully!')
     
     return redirect(url_for('recipes.view', id=id))
-
-@bp.route('/<int:id>/delete', methods=['POST'])
-@login_required
-def delete(id):
-    """Delete a recipe created or forked by the user."""
-    from app.db import get_db
-    db = get_db()
-    
-    # Fetch the recipe to verify ownership
-    recipe = db.execute('SELECT * FROM recipes WHERE id = ?', (id,)).fetchone()
-    
-    if recipe is None:
-        flash('Recipe not found.', 'error')
-        return redirect(url_for('dashboard.index'))
-        
-    # Security check: Make sure the current user is the author
-    if recipe['author_id'] != g.user['id']:
-        flash('You do not have permission to delete this recipe.', 'error')
-        return redirect(url_for('dashboard.index'))
-        
-    # Delete the recipe (SQLite will handle related rows if ON DELETE CASCADE is set up,
-    # otherwise we manually delete related data first to keep the database clean)
-    db.execute('DELETE FROM ingredients WHERE recipe_id = ?', (id,))
-    db.execute('DELETE FROM instructions WHERE recipe_id = ?', (id,))
-    db.execute('DELETE FROM recipe_tags WHERE recipe_id = ?', (id,))
-    db.execute('DELETE FROM recipe_categories WHERE recipe_id = ?', (id,))
-    db.execute('DELETE FROM saved_recipes WHERE recipe_id = ?', (id,))
-    db.execute('DELETE FROM recipes WHERE id = ?', (id,))
-    db.commit()
-    
-    flash(f'"{recipe["title"]}" was successfully deleted.', 'success')
-    return redirect(url_for('dashboard.index'))
