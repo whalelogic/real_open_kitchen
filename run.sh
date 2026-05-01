@@ -12,7 +12,9 @@ echo "Press Ctrl+C to stop the server"
 echo ""
 
 # Run flask init-db to initialize the database if it doesn't exist
-# Uncomment the line below if you want to check before initializing the db
-# if [ ! -f "instance/open_kitchen.db" ]; then
+# if [ ! -f "instance/community_kitchen.db" ]; then
+#     python3 -m flask init-db
+# fi
 
-flask run
+python3 -m flask run
+
