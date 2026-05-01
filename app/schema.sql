@@ -144,6 +144,7 @@ CREATE TABLE recipes (
     cook_time_minutes INTEGER,
     parent_recipe_id INTEGER,
     is_public INTEGER DEFAULT 1,
+    image_url TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME,
     FOREIGN KEY (author_id) REFERENCES users(id),

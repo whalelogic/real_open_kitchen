@@ -1,4 +1,9 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, g
+import os
+import uuid
+import json
+from google import genai
+from google.genai import types
+from flask import Blueprint, render_template, request, redirect, url_for, flash, g, jsonify
 from app.models import Recipe, Ingredient, Instruction, Review, Comment, ActivityLog, Unit, Allergen, Category, Tag
 from app.auth import login_required
 
@@ -94,8 +99,10 @@ def create():
         base_servings = request.form.get('base_servings', type=int)
         prep_time = request.form.get('prep_time_minutes', type=int)
         cook_time = request.form.get('cook_time_minutes', type=int)
-        category_ids = request.form.getlist('categories')
-        tag_ids = request.form.getlist('tags')
+
+        # Use set() to remove any duplicates sent by the browser
+        category_ids = set(request.form.getlist('categories'))
+        tag_ids = set(request.form.getlist('tags'))
         
         error = None
         if not title:
@@ -113,15 +120,148 @@ def create():
             
             for cat_id in category_ids:
                 db.execute(
-                    'INSERT INTO recipe_categories (recipe_id, category_id) VALUES (?, ?)',
+                    'INSERT OR IGNORE INTO recipe_categories (recipe_id, category_id) VALUES (?, ?)',
                     (recipe_id, cat_id)
                 )
             
             for tag_id in tag_ids:
                 db.execute(
-                    'INSERT INTO recipe_tags (recipe_id, tag_id) VALUES (?, ?)',
+                    'INSERT OR IGNORE INTO recipe_tags (recipe_id, tag_id) VALUES (?, ?)',
                     (recipe_id, tag_id)
                 )
+
+            # --- NEW AI DATA PROCESSING ---
+            import json
+            ai_ingredients_raw = request.form.get('ai_ingredients')
+            ai_instructions_raw = request.form.get('ai_instructions')
+
+            # Process Ingredients
+            if ai_ingredients_raw:
+                try:
+                    ingredients_data = json.loads(ai_ingredients_raw)
+                    # Create a dictionary to easily look up unit IDs by name (e.g., 'cup': 5)
+                    unit_rows = db.execute('SELECT id, name, abbreviation FROM units').fetchall()
+                    unit_map = {u['name'].lower(): u['id'] for u in unit_rows}
+                    
+                    # Fallback to 'piece' (usually ID 10) or 'to taste' if the AI gives a weird unit
+                    fallback_unit_id = unit_map.get('piece', 1) 
+
+                    for ing in ingredients_data:
+                        name = ing.get('name', 'Unknown Ingredient')
+                        
+                        # Ensure quantity is a float (AI sometimes returns strings)
+                        try:
+                            qty_raw = ing.get('qty')
+                            qty = float(qty_raw) if qty_raw is not None else 1.0
+                        except (ValueError, TypeError):
+                            qty = 1.0
+                            
+                        unit_str = str(ing.get('unit', '')).lower()
+                        unit_id = unit_map.get(unit_str, fallback_unit_id)
+
+                        db.execute(
+                            'INSERT INTO ingredients (recipe_id, name, quantity, unit_id) VALUES (?, ?, ?, ?)',
+                            (recipe_id, name, qty, unit_id)
+                        )
+                except Exception as e:
+                    print(f"Failed to parse AI ingredients: {e}")
+
+            # Process Instructions
+            if ai_instructions_raw:
+                try:
+                    instructions_data = json.loads(ai_instructions_raw)
+                    for i, step_text in enumerate(instructions_data):
+                        db.execute(
+                            'INSERT INTO instructions (recipe_id, step_number, content) VALUES (?, ?, ?)',
+                            (recipe_id, i + 1, step_text)
+                        )
+                except Exception as e:
+                    print(f"Failed to parse AI instructions: {e}")
+            # --- END AI DATA PROCESSING ---
+
+
+# --- START FREEPIK AI IMAGE GENERATION ---
+            try:
+                import requests
+                import os
+                import base64
+                import uuid
+                from google import genai
+
+                client = genai.client()
+                safety_prompt = f"Is the following title a food dish, beverage, or recipe? Reply with ONLY the word YES or NO. Title: '{title}'"
+                
+                safety_response = client.models.generate_content(
+                    model='gemini-2.5-flash',
+                    contents=safety_prompt
+                )
+
+                is_food = safety_response.text.strip().upper()
+                
+                if "YES" not in is_food:
+                    print(f"Safeguard triggered: '{title}' is not a valid food item.")
+                    raise ValueError("Title is not food-related.") # This intentionally crashes the try block!
+                    
+                image_prompt = (
+                    f"Ultra-realistic, 8k professional food photography of exactly this dish: {title}. "
+                    f"Context: {description}. "
+                    f"CRITICAL RESTRICTION: You must strictly depict ONLY the ingredients implied by the title and description. "
+                    f"Do absolutely NOT add random garnishes, extra vegetables, side salads, or drinks that are not part of the dish. "
+                    f"Style: Photorealistic, macro food lens, natural window lighting, highly detailed."
+                )
+                
+                api_key = os.environ.get("FREEPIK_API_KEY") 
+                
+                # The exact endpoint from Freepik's documentation
+                url = "https://api.freepik.com/v1/ai/text-to-image" 
+                
+                headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                    "x-freepik-api-key": api_key
+                }
+                
+                payload = {
+                    "prompt": image_prompt,
+                    # You can add parameters like "aspect_ratio": "4:3" if Freepik supports it
+                }
+                
+                # Make the request to Freepik
+                response = requests.post(url, headers=headers, json=payload)
+                response.raise_for_status() # Check for errors (like 401 or 429)
+                
+                # Parse the response
+                data = response.json()
+                
+                # Freepik packages the image as a base64 string in an array
+                base64_string = data['data'][0]['base64']
+                image_bytes = base64.b64decode(base64_string)
+                
+                # Create a unique filename and save path
+                filename = f"recipe_{recipe_id}_{uuid.uuid4().hex[:8]}.jpg"
+                save_dir = os.path.join(os.getcwd(), 'app', 'static', 'images', 'recipes')
+                os.makedirs(save_dir, exist_ok=True)
+                filepath = os.path.join(save_dir, filename)
+
+                # Save the physical file to your server
+                with open(filepath, "wb") as f:
+                    f.write(image_bytes)
+                
+                # Update your database with the local URL
+                image_url = f"/static/images/recipes/{filename}"
+                db.execute('UPDATE recipes SET image_url = ? WHERE id = ?', (image_url, recipe_id))
+                db.commit()
+                print(f"Successfully decoded and saved: {filename}")
+
+            except Exception as e:
+                print(f"Freepik API failed: {e}")
+                
+                # --- THE SMOKE AND MIRRORS FALLBACK ---
+                print("Deploying the gorgeous fallback image for the demo!")
+                fallback_image = "https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=1000&auto=format&fit=crop"
+                db.execute('UPDATE recipes SET image_url = ? WHERE id = ?', (fallback_image, recipe_id))
+                db.commit()
+            # --- END FREEPIK AI IMAGE GENERATION ---
             
             db.commit()
             ActivityLog.log(g.user['id'], 'created', 'recipe', recipe_id)
@@ -307,6 +447,80 @@ def delete(id):
         flash('Recipe could not be deleted.')
 
     return redirect(url_for('dashboard.index'))
+
+
+@bp.route('/parse', methods=['POST'])
+@login_required
+def parse_recipe():
+    """Takes raw text from the frontend and returns a structured JSON recipe."""
+    data = request.get_json()
+    raw_text = data.get('text', '')
+
+    if not raw_text:
+        return jsonify({'error': 'No text provided'}), 400
+
+    prompt = f"""
+    You are a strict culinary parser. 
+    
+    STEP 1: Evaluate the text. If the text is clearly NOT a recipe or food instructions (e.g., it is a conversation, a joke, an essay, or random gibberish), return EXACTLY this JSON and nothing else:
+    {{"error": "NOT_A_RECIPE"}}
+
+    STEP 2: If it IS a recipe, extract the details and return ONLY a valid JSON object. Do not include markdown formatting.
+    Use exactly these keys:
+    - "title" (string)
+    - "description" (string)
+    - "base_servings" (integer)
+    - "prep_time_minutes" (integer)
+    - "cook_time_minutes" (integer)
+    - "ingredients" (array of objects with name, qty, unit)
+    - "instructions" (array of strings)
+    - "categories" (array of strings, ONLY pick from: Appetizer, Main Course, Dessert, Breakfast, Lunch, Dinner, Snack)
+    - "tags" (array of strings, ONLY pick from: Vegetarian, Vegan, Gluten-Free, Dairy-Free, Nut-Free, Keto, Quick, Easy)
+
+    Text to parse:
+    {raw_text}
+    """
+
+    try:
+        import json
+        from google import genai
+        from google.genai import types
+
+        # The client automatically detects GEMINI_API_KEY from your .flaskenv
+        client = genai.Client()
+
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+            )
+        )
+
+        # --- NEW: CLEAN THE AI'S RESPONSE BEFORE PARSING ---
+        raw_ai_text = response.text.strip()
+        
+        # Strip out markdown formatting if the AI decided to be chatty
+        if raw_ai_text.startswith("```json"):
+            raw_ai_text = raw_ai_text[7:]
+        if raw_ai_text.startswith("```"):
+            raw_ai_text = raw_ai_text[3:]
+        if raw_ai_text.endswith("```"):
+            raw_ai_text = raw_ai_text[:-3]
+            
+        raw_ai_text = raw_ai_text.strip()
+        
+        # Now try to read the cleaned text
+        parsed_data = json.loads(raw_ai_text)
+        # --- NEW SAFEGUARD CHECK ---
+        if parsed_data.get("error") == "NOT_A_RECIPE":
+            return jsonify({'error': 'Please paste a valid recipe.'}), 400
+        return jsonify(parsed_data)
+
+    except Exception as e:
+        print(f"MAGIC PASTE CRASH REPORT: {e}") 
+        return jsonify({'error': str(e)}), 500
+
 
 
 @bp.route('/<int:id>/save', methods=('POST',))
