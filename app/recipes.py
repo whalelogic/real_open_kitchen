@@ -188,7 +188,7 @@ def create():
                 import uuid
                 from google import genai
 
-                client = genai.client()
+                client = genai.Client()
                 safety_prompt = f"Is the following title a food dish, beverage, or recipe? Reply with ONLY the word YES or NO. Title: '{title}'"
                 
                 safety_response = client.models.generate_content(

@@ -234,10 +234,12 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { statusText.style.display = 'none'; }, 5000);
 
         } catch (error) {
-            console.error('Error parsing recipe:', error);
-            statusText.innerText = '❌ Oops, we could not parse that text.';
-            statusText.style.color = '#ff3860';
-        }
+			console.error('Error parsing recipe:', error);
+            // Use the specific Python error message, or default to Oops if the server is offline
+ 			statusText.innerText = '❌ ' + (error.message || 'Oops, we could not parse that text.'); 
+			statusText.style.color = '#ff3860';
+		}
+            
     });
 });
 </script>
