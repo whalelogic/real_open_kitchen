@@ -1,0 +1,72 @@
+formatd164f57 - Keith Thomson, 2 days ago : Improve run.sh robustness using python3 -m flask
+formatea7b655 - Keith Thomson, 2 days ago : Stop tracking venv directory
+format3015dd9 - Keith Thomson, 2 days ago : Update requirements.txt with fixed dependencies
+formatbdba1a9 - Keith Thomson, 2 days ago : Cleanup redundant delete buttons in dashboard
+format3879fed - Keith Thomson, 2 days ago : Merge testing into main and resolve DB conflict
+formatc3c7055 - Keith Thomson, 2 days ago : Merge ai-features into main and resolve conflicts
+formatea77f7b - Kevin, 3 days ago : Added setup guide
+format2886736 - Kevin, 3 days ago : Removed delete func for merge prep. Also implemented AI safegaurds
+format57c0ff8 - raeann-mclean, 3 days ago : added functional review/rating + comments - may need to be edited for better UI + debugging
+format547009b - Keith Thomson, 5 days ago : Merge pull request #18 from whalelogic/testing
+format77bec0a - Kevin, 5 days ago : saved DB for images
+format144896e - Camila Lopez, 5 days ago : Clean up recipe type, notifications, and search results
+format6b8bf9e - Camila Lopez, 6 days ago : Add recipe deletion and saved removal controls
+format2740b70 - Kevin, 6 days ago : Implement AI image generation and stabilize Gemini parsing
+format14c5f49 - Kevin, 7 days ago : revoked sensitive info
+format3300d81 - Kevin, 7 days ago : updated recipe.py
+format65cd87d - Kevin, 7 days ago : feat: complete magic paste and AI image generation
+format1af06f9 - Keith Thomson, 7 days ago : Merge pull request #16 from whalelogic/testing
+formatf15c4b4 - Keith Thomson, 7 days ago : Merge pull request #15 from whalelogic/main
+formatfec7c84 - Keith Thomson, 7 days ago : Merge pull request #14 from whalelogic/testing
+format36bebc1 - Kevin, 10 days ago : Implement dynamic ingredient scaling
+format5045e89 - Camila Lopez, 12 days ago : Merge branch 'testing' of https://github.com/whalelogic/real_open_kitchen into testing
+format5b03eeb - Keith Thomson, 12 days ago : Merge pull request #13 from whalelogic/main
+format17629b3 - Keith Thomson, 12 days ago : Merge pull request #12 from whalelogic/testing
+format89b4ce7 - Camila Lopez, 12 days ago : account settings ui
+formatb230ebb - Kevin, 12 days ago : Implement password strength requirements and real-time GUI feedback
+formate557f1f - Keith Thomson, 3 weeks ago : Fix navbar: remove duplicate avatar and fix dropdown hover gap
+formatad342c0 - Keith Thomson, 3 weeks ago : Merge pull request #10 from whalelogic/testing
+formatb6a0c45 - raeann-mclean, 3 weeks ago : d
+formatdba9630 - raeann-mclean, 3 weeks ago : fix so hovering avatar makes drop down
+formatc1b6f23 - raeann-mclean, 3 weeks ago : fixed basehtml
+format71e2992 - raeann-mclean, 3 weeks ago : fixed userpy
+formate3876f9 - raeann-mclean, 3 weeks ago : account menu and setttings route and navbar dropdown
+format4b9923a - Camila Lopez, 3 weeks ago : Completed UI, added in app notifications if someone forks your recipe, and admin can update user roles from contributor and curator
+format6f8021b - Keith Thomson, 3 weeks ago : Merge pull request #9 from whalelogic/testing
+format09f927b - Keith Thomson, 3 weeks ago : Merge pull request #8 from whalelogic/main
+formatee43606 - Keith Thomson, 3 weeks ago : Merge pull request #7 from whalelogic/testing
+format24926c4 - Kevin, 3 weeks ago : Implement 6-digit OTP forgot password feature and logic
+format05c93d9 - Camila Lopez, 3 weeks ago : completed the ui for creating a recipe
+format797953d - Camila Lopez, 3 weeks ago : comment
+formatbf50ffc - Camila Lopez, 4 weeks ago : testing commit
+format2c22fbe - Keith Thomson, 4 weeks ago : Merge pull request #6 from whalelogic/copilot/give-repo-access-to-collaborators
+format613ad33 - Keith Thomson, 4 weeks ago : Merge branch 'main' into copilot/give-repo-access-to-collaborators
+format8a46fd2 - Keith Thomson, 4 weeks ago : Update README.md
+format6391b32 - Camila Lopez, 4 weeks ago : removed comments
+format81e7b3d - Camila Lopez, 4 weeks ago : removed comments from base.html
+format799302f - Keith Thomson, 4 weeks ago : add source code
+format58c9127 - Keith Thomson, 4 weeks ago : adjusted .gitignore
+formatcf2a813 - Keith Thomson, 4 weeks ago : Added /testing to .gitignore
+format90b8ec3 - Keith Thomson, 4 weeks ago : Merge pull request #5 from whalelogic/copilot/test-branch-commit-instructions
+formate9a5ef0 - copilot-swe-agent[bot], 4 weeks ago : Add git_instructions.md with steps to commit to test branch
+formatb2b2da9 - Keith Thomson, 4 weeks ago : style: fixed div class auth-card
+formatbe708ce - Keith Thomson, 4 weeks ago : add .gitignore
+format41dbd0b - Keith Thomson, 4 weeks ago : Update README.md
+format69fa4c5 - Keith Thomson, 4 weeks ago : Update README2.md
+format63cb8d2 - Keith Thomson, 4 weeks ago : Delete testing/DRAFT_README.md
+format72570a3 - Keith Thomson, 4 weeks ago : test
+formata094fcf - Keith Thomson, 4 weeks ago : added /venv to test something.
+format9ef27ec - Keith Thomson, 4 weeks ago : first sprint
+format19579ae - Keith Thomson, 4 weeks ago : Rename README.md to README2.md
+formata7f32bb - Keith Thomson, 4 weeks ago : Simplify contribution instructions in README
+format5fcc1d8 - Keith Thomson, 4 weeks ago : Update README.md
+format84a410f - Keith Thomson, 4 weeks ago : Update README.md
+formatea22a09 - Keith Thomson, 4 weeks ago : Update README.md
+formatf8f82bb - Keith Thomson, 4 weeks ago : Update README.md
+formate8c3807 - Keith Thomson, 4 weeks ago : Enhance README with branching and review details
+format5f81ad0 - Keith Thomson, 4 weeks ago : Update project description in README.md
+format467063f - Keith Thomson, 4 weeks ago : Merge pull request #1 from whalelogic/copilot/add-readme-instructions
+format81c2d10 - copilot-swe-agent[bot], 4 weeks ago : docs: rewrite README with full team guidelines for My Open Kitchen
+formata56d047 - Keith Thomson, 4 weeks ago : Add Git usage instructions to README
+format61f5178 - Keith Thomson, 4 weeks ago : Update README.md
+formate2a258f - Keith Thomson, 4 weeks ago : Initial commit
